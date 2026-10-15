@@ -7,17 +7,22 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☕</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #ea580c;
+      --primary-hover: #c2410c;
       --primary-light: #fff7ed;
       --accent-green: #10b981;
+      --accent-green-light: #ecfdf5;
       --accent-red: #e11d48;
-      --bg: #0f172a;
-      --card-bg: rgba(255, 255, 255, 0.96);
+      --accent-red-light: #fff1f2;
+      --accent-blue: #2563eb;
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --border-color: #e2e8f0;
       --text: #0f172a;
-      --text-muted: #64748b;
+      --text-muted: #475569;
     }
 
     * {
@@ -29,12 +34,12 @@
 
     body {
       font-family: 'Zen Maru Gothic', 'Plus Jakarta Sans', sans-serif;
-      background: var(--bg);
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+      overflow-x: hidden;
     }
 
     /* 上部プログレスバー */
@@ -43,34 +48,37 @@
       top: 0;
       left: 0;
       width: 100%;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.1);
+      height: 7px;
+      background: #e2e8f0;
       z-index: 100;
     }
 
     .progress-bar {
       height: 100%;
       background: linear-gradient(90deg, #f97316, #ea580c);
-      width: 10%;
+      width: 8%;
       transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     /* ヘッダー */
     .slide-header {
-      padding: 1rem 1.5rem;
+      padding: 1rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      color: white;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
       z-index: 50;
     }
 
     .header-logo {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
-      font-weight: 800;
-      font-size: 1.1rem;
+      gap: 0.75rem;
+      font-weight: 900;
+      font-size: 1.25rem;
+      color: var(--primary);
     }
 
     .header-actions {
@@ -80,20 +88,25 @@
     }
 
     .btn-top {
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: white;
-      padding: 0.4rem 0.85rem;
+      background: white;
+      border: 1px solid #cbd5e1;
+      color: var(--text);
+      padding: 0.5rem 1.1rem;
       border-radius: 9999px;
-      font-size: 0.85rem;
-      font-weight: 700;
+      font-size: 0.92rem;
+      font-weight: 800;
       text-decoration: none;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
       transition: all 0.2s;
     }
 
     .btn-top:hover {
-      background: rgba(255, 255, 255, 0.22);
+      background: #f8fafc;
+      border-color: #94a3b8;
     }
 
     /* スライド表示エリア */
@@ -102,22 +115,23 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1rem 1.5rem;
+      padding: 1.5rem 2rem;
       position: relative;
     }
 
     .slide {
       background: var(--card-bg);
-      border-radius: 24px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      max-width: 960px;
-      width: 100%;
-      min-height: 520px;
-      padding: 2.5rem 3rem;
+      border-radius: 28px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+      max-width: 1200px;
+      width: 95vw;
+      min-height: 620px;
+      padding: 3rem 3.5rem;
       display: none;
       flex-direction: column;
       justify-content: space-between;
-      animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     .slide.active {
@@ -125,62 +139,89 @@
     }
 
     @keyframes slideIn {
-      from { opacity: 0; transform: scale(0.96) translateY(12px); }
+      from { opacity: 0; transform: scale(0.97) translateY(10px); }
       to { opacity: 1; transform: scale(1) translateY(0); }
     }
 
-    /* スライド内タイポグラフィ */
+    /* バッジ */
     .slide-badge {
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      padding: 0.3rem 0.8rem;
+      padding: 0.35rem 0.95rem;
       background: var(--primary-light);
       color: var(--primary);
       border-radius: 9999px;
-      font-size: 0.88rem;
+      font-size: 0.95rem;
       font-weight: 800;
       margin-bottom: 0.75rem;
       align-self: flex-start;
+      border: 1px solid #fed7aa;
     }
 
+    .slide-badge.dpay {
+      background: var(--accent-red-light);
+      color: var(--accent-red);
+      border-color: #fecdd3;
+    }
+
+    .slide-badge.kitchen {
+      background: var(--accent-green-light);
+      color: var(--accent-green);
+      border-color: #a7f3d0;
+    }
+
+    /* タイトル */
     .slide-title {
-      font-size: 2rem;
+      font-size: 2.3rem;
       font-weight: 900;
       color: var(--text);
       line-height: 1.3;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
       letter-spacing: -0.02em;
     }
 
+    /* 本文エリア */
     .slide-body {
       flex: 1;
-      font-size: 1.05rem;
-      line-height: 1.7;
+      font-size: 1.15rem;
+      line-height: 1.8;
       color: #334155;
     }
 
-    /* 各種コンポーネント */
+    /* グリッドカード */
     .step-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
-      margin-top: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.25rem;
     }
 
     .step-card {
       background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 1.25rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.6rem;
+      transition: all 0.2s;
+    }
+
+    .step-card:hover {
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
     }
 
     .step-num {
-      width: 32px;
-      height: 32px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       background: var(--primary);
       color: white;
@@ -188,70 +229,125 @@
       align-items: center;
       justify-content: center;
       font-weight: 900;
-      font-size: 0.95rem;
+      font-size: 1.1rem;
+      flex-shrink: 0;
     }
 
+    .step-card strong {
+      font-size: 1.2rem;
+      color: var(--text);
+    }
+
+    .step-card p {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* コールアウトボックス */
     .highlight-box {
       background: #fff7ed;
-      border-left: 5px solid #ea580c;
-      padding: 1rem 1.25rem;
-      border-radius: 8px;
-      margin: 1rem 0;
-      font-size: 0.98rem;
+      border-left: 6px solid #ea580c;
+      padding: 1.25rem 1.5rem;
+      border-radius: 12px;
+      margin: 1.25rem 0;
+      font-size: 1.1rem;
+      line-height: 1.7;
     }
 
     .alert-box {
       background: #fff1f2;
-      border-left: 5px solid #e11d48;
-      padding: 1rem 1.25rem;
-      border-radius: 8px;
-      margin: 1rem 0;
-      font-size: 0.98rem;
-      color: #881337;
+      border-left: 6px solid #e11d48;
+      padding: 1.25rem 1.5rem;
+      border-radius: 12px;
+      margin: 1.25rem 0;
+      font-size: 1.1rem;
+      color: #9f1239;
+      line-height: 1.7;
     }
 
     .success-box {
-      background: #f0fdf4;
-      border-left: 5px solid #10b981;
-      padding: 1rem 1.25rem;
-      border-radius: 8px;
-      margin: 1rem 0;
-      font-size: 0.98rem;
+      background: #ecfdf5;
+      border-left: 6px solid #10b981;
+      padding: 1.25rem 1.5rem;
+      border-radius: 12px;
+      margin: 1.25rem 0;
+      font-size: 1.1rem;
       color: #065f46;
+      line-height: 1.7;
     }
 
-    /* スライドフッター（ページ番号・ナビ） */
+    /* 操作リスト */
+    .action-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .action-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .action-icon {
+      font-size: 1.8rem;
+      line-height: 1;
+      margin-top: 0.1rem;
+    }
+
+    .action-content h4 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+
+    .action-content p {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* フッターナビゲーション */
     .slide-footer-nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding-top: 1.5rem;
-      border-top: 1px solid #e2e8f0;
-      margin-top: 1rem;
+      border-top: 1px solid var(--border-color);
+      margin-top: 1.5rem;
     }
 
     .slide-counter {
-      font-size: 0.9rem;
-      font-weight: 800;
+      font-size: 1.1rem;
+      font-weight: 900;
       color: var(--text-muted);
     }
 
     .slide-ctrl-btns {
       display: flex;
-      gap: 0.75rem;
+      gap: 1rem;
     }
 
     .btn-nav {
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      padding: 0.6rem 1.25rem;
+      background: white;
+      border: 1.5px solid #cbd5e1;
+      color: var(--text);
+      padding: 0.75rem 1.75rem;
       border-radius: 9999px;
       font-weight: 800;
-      font-size: 0.95rem;
+      font-size: 1.05rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.5rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.04);
       transition: all 0.2s;
     }
 
@@ -259,26 +355,39 @@
       background: var(--primary);
       color: white;
       border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .btn-nav.btn-primary-action {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
     }
 
     .btn-nav:disabled {
-      opacity: 0.4;
+      opacity: 0.35;
       cursor: not-allowed;
+      transform: none;
     }
 
-    @media (max-width: 768px) {
+    /* レスポンシブ対応 */
+    @media (max-width: 900px) {
       .slide {
-        padding: 1.5rem;
-        min-height: 480px;
+        padding: 2rem 1.5rem;
+        min-height: 520px;
+        border-radius: 20px;
       }
       .slide-title {
-        font-size: 1.45rem;
+        font-size: 1.65rem;
       }
       .slide-body {
-        font-size: 0.92rem;
+        font-size: 1rem;
       }
       .step-grid {
         grid-template-columns: 1fr;
+      }
+      .action-item {
+        padding: 1rem;
       }
     }
   </style>
@@ -294,11 +403,11 @@
   <header class="slide-header">
     <div class="header-logo">
       <span>☕</span>
-      <span>1-16 カフェ POSレジ 操作マニュアル</span>
+      <span>1-16 カフェ 文化祭POSレジ 操作マニュアル</span>
     </div>
     <div class="header-actions">
-      <button class="btn-top" id="btnFullscreen">⛶ フルスクリーン</button>
-      <a href="/" class="btn-top" style="background: var(--primary); border: none;">🛒 POSレジを開く</a>
+      <button class="btn-top" id="btnFullscreen">⛶ 全画面表示</button>
+      <a href="/" class="btn-top" style="background: var(--primary); color: white; border: none;">🛒 レジ画面を開く</a>
     </div>
   </header>
 
@@ -307,302 +416,472 @@
 
     <!-- スライド 1: 表紙 -->
     <section class="slide active">
-      <span class="slide-badge">📖 文化祭 運営マニュアル</span>
+      <span class="slide-badge">📖 1-16 クラス運営マニュアル</span>
       <div>
-        <h1 class="slide-title" style="font-size: 2.6rem; margin-bottom: 1rem;">
+        <h1 class="slide-title" style="font-size: 3rem; margin-bottom: 1.25rem;">
           ☕ 1-16 カフェ<br/>
-          スマートPOSレジ 使い方ガイド
+          スマートPOSレジ 操作完全ガイド
         </h1>
-        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.7;">
-          誰でもスマホやiPadでサクサク使える！<br/>
-          レジ打ち・d払い・厨房呼び出し・売上集計の完全マニュアルです。
+        <p style="font-size: 1.35rem; color: var(--text-muted); line-height: 1.8;">
+          誰でも迷わずサクサク使える！<br/>
+          <strong>レジ会計・お釣り計算・d払いQR決済・厨房呼び出し・売上管理</strong> を分かりやすく解説します。
         </p>
       </div>
+
       <div class="highlight-box">
-        💡 <strong>キーボードの「➔」キー または 画面下のボタン</strong> で次のスライドに進めます（スマホはスワイプ対応）。
+        👉 <strong>キーボードの「➔」キー</strong> または画面下の <strong>「次へ ➔」ボタン</strong> で進めます（スマホは画面を左右にスワイプできます）。
       </div>
+
       <div class="slide-footer-nav">
-        <span class="slide-counter">1 / 9</span>
+        <span class="slide-counter">1 / 12</span>
         <div class="slide-ctrl-btns">
-          <button class="btn-nav btn-prev" disabled>前へ</button>
-          <button class="btn-nav btn-next">次へ ➔</button>
+          <button class="btn-nav btn-prev" disabled>← 前へ</button>
+          <button class="btn-nav btn-next btn-primary-action">次へ ➔</button>
         </div>
       </div>
     </section>
 
-    <!-- スライド 2: 全体像 -->
+    <!-- スライド 2: 全体の仕組み -->
     <section class="slide">
-      <span class="slide-badge">⚡ 全体の仕組み</span>
-      <h2 class="slide-title">レジと厨房が完全リアルタイム連動！</h2>
+      <span class="slide-badge">⚡ システムの全体像</span>
+      <h2 class="slide-title">レジと厨房がクラウドでリアルタイム連動！</h2>
       <div class="slide-body">
-        <p>大声で注文を叫ばなくても、クラウド（Firebase）で全員の端末が即座に連動します。</p>
-        <div class="step-grid" style="margin-top: 1.25rem;">
-          <div class="step-card">
-            <span class="step-num">1</span>
-            <strong>🛒 レジ端末（iPad/スマホ）</strong>
-            <p style="font-size: 0.88rem; color: var(--text-muted);">
-              メニューを選んで会計完了すると、自動で「#001」等の引換券が発行されます。
-            </p>
-          </div>
-          <div class="step-card">
-            <span class="step-num">2</span>
-            <strong>🍳 厨房端末（スマホ/PC）</strong>
-            <p style="font-size: 0.88rem; color: var(--text-muted);">
-              ピンポーン♪ と新着オーダーカードが即座に追加され、調理を開始します。
-            </p>
-          </div>
-          <div class="step-card">
-            <span class="step-num">3</span>
-            <strong>📢 お客様呼出モニター</strong>
-            <p style="font-size: 0.88rem; color: var(--text-muted);">
-              調理完了を押すと、特大画面に「#001 お渡し可能」と大きく表示されます！
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="slide-footer-nav">
-        <span class="slide-counter">2 / 9</span>
-        <div class="slide-ctrl-btns">
-          <button class="btn-nav btn-prev">← 前へ</button>
-          <button class="btn-nav btn-next">次へ ➔</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- スライド 3: レジ担当（基本操作） -->
-    <section class="slide">
-      <span class="slide-badge">🛒 レジ担当編</span>
-      <h2 class="slide-title">お会計の基本3ステップ</h2>
-      <div class="slide-body">
+        <p style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem;">
+          大声で「クレープ1つ！」と叫ぶ必要はありません。全端末が数ミリ秒で自動同期されます。
+        </p>
         <div class="step-grid">
           <div class="step-card">
-            <span class="step-num">1</span>
-            <strong>商品を選んでタップ</strong>
-            <p style="font-size: 0.88rem; color: var(--text-muted);">
-              左側のクレープやドリンクをタップ。上のカテゴリボタンで素早く絞り込めます。
+            <div class="step-header">
+              <span class="step-num">1</span>
+              <strong>🛒 レジ（iPad / スマホ）</strong>
+            </div>
+            <p>
+              注文を受けて会計を完了すると、画面に「#001」などの引換券が表示され、データが瞬時にクラウドへ送られます。
             </p>
           </div>
           <div class="step-card">
-            <span class="step-num">2</span>
-            <strong>個数の確認・変更</strong>
-            <p style="font-size: 0.88rem; color: var(--text-muted);">
-              右側のリストで <code>＋</code> <code>−</code> をタップして個数を調整します。
+            <div class="step-header">
+              <span class="step-num" style="background: #10b981;">2</span>
+              <strong>🍳 厨房（スマホ / PC）</strong>
+            </div>
+            <p>
+              <strong>ピンポーン♪</strong> と音が鳴り、画面の「調理中」列に注文カードが自動で出現！調理を開始します。
             </p>
           </div>
           <div class="step-card">
-            <span class="step-num">3</span>
-            <strong>お会計に進む</strong>
-            <p style="font-size: 0.88rem; color: var(--text-muted);">
-              右下の大きなオレンジボタン <strong>「お会計に進む」</strong> を押します。
+            <div class="step-header">
+              <span class="step-num" style="background: #2563eb;">3</span>
+              <strong>📢 呼出モニター（大型画面）</strong>
+            </div>
+            <p>
+              調理完了を押すと、プロジェクターやモニターに「#001 お渡し可能」と特大表示され、お客様にお知らせできます！
             </p>
           </div>
         </div>
       </div>
       <div class="slide-footer-nav">
-        <span class="slide-counter">3 / 9</span>
+        <span class="slide-counter">2 / 12</span>
         <div class="slide-ctrl-btns">
           <button class="btn-nav btn-prev">← 前へ</button>
-          <button class="btn-nav btn-next">次へ ➔</button>
+          <button class="btn-nav btn-next btn-primary-action">次へ ➔</button>
         </div>
       </div>
     </section>
 
-    <!-- スライド 4: 現金会計 -->
+    <!-- スライド 3: レジ基本操作 -->
     <section class="slide">
-      <span class="slide-badge">💵 現金会計の手順</span>
-      <h2 class="slide-title">お預かり金額を入力してお釣りを渡す</h2>
+      <span class="slide-badge">🛒 レジ担当編 (1/4)</span>
+      <h2 class="slide-title">注文の入力とカート操作</h2>
       <div class="slide-body">
+        <div class="action-list">
+          <div class="action-item">
+            <span class="action-icon">👆</span>
+            <div class="action-content">
+              <h4>1. 商品をタップして注文リストに追加</h4>
+              <p>画面左側のメニュー（クレープ、ワッフル、タピオカ、ドリンク）をタップすると右側のリストに入ります。上のカテゴリーボタン（クレープ、ドリンク等）を押すと素早く絞り込めます。</p>
+            </div>
+          </div>
+          <div class="action-item">
+            <span class="action-icon">🔢</span>
+            <div class="action-content">
+              <h4>2. 数量の変更（＋／− ボタン）</h4>
+              <p>右側の注文リストで <strong>「＋」</strong> を押すと数量増加、<strong>「−」</strong> を押すと減少します（数量が0になると自動で削除されます）。</p>
+            </div>
+          </div>
+          <div class="action-item">
+            <span class="action-icon">🗑️</span>
+            <div class="action-content">
+              <h4>3. 注文を最初からやり直す場合</h4>
+              <p>右上の <strong>「全て取消」</strong> ボタンを押すと、カートが空になり最初からやり直せます。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer-nav">
+        <span class="slide-counter">3 / 12</span>
+        <div class="slide-ctrl-btns">
+          <button class="btn-nav btn-prev">← 前へ</button>
+          <button class="btn-nav btn-next btn-primary-action">次へ ➔</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- スライド 4: お会計へ進む -->
+    <section class="slide">
+      <span class="slide-badge">🛒 レジ担当編 (2/4)</span>
+      <h2 class="slide-title">お会計ボタンと支払い方法の選択</h2>
+      <div class="slide-body">
+        <p style="font-size: 1.2rem; margin-bottom: 1rem;">
+          注文内容が確定したら、右下の大きなオレンジボタン <strong>「お会計に進む ➔」</strong> をタップします。
+        </p>
+
         <div class="highlight-box">
-          モーダルを開くと最初から <strong>「💵 現金」</strong> が選択されています。
+          モーダル上部に <strong>「💵 現金」</strong> と <strong>「📱 d払い」</strong> の切り替えタブがあります。<br/>
+          お客様のお支払い方法に合わせてタブをタップしてください。
         </div>
-        <ol style="padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
-          <li><strong>お預かり金額を入力</strong>: テンキーをタップするか、「ちょうど」「+1,000円」などのクイックボタンを押します。</li>
-          <li><strong>お釣りを確認</strong>: 画面にお釣りが緑色で自動計算されます。お預かり不足時はボタンが押せない設計です。</li>
-          <li><strong>会計完了を押す</strong>: 紙吹雪とともに「お呼び出し番号 #001」の引換チケットが表示されます！</li>
-          <li><strong>お客様へご案内</strong>: 「引換番号 #001番でお呼び出ししますので少々お待ちください！」とお伝えします。</li>
-        </ol>
+
+        <div class="step-grid">
+          <div class="step-card" style="border-color: #fdba74;">
+            <strong>💵 現金決済の場合</strong>
+            <p>初期状態で選ばれています。テンキーやクイックボタンでお預かり金額を入力します。</p>
+          </div>
+          <div class="step-card" style="border-color: #fda4af;">
+            <strong>📱 d払い決済の場合</strong>
+            <p>「📱 d払い」タブを押すと、画面が赤色になり、お客様専用の支払い案内画面に切り替わります。</p>
+          </div>
+        </div>
       </div>
       <div class="slide-footer-nav">
-        <span class="slide-counter">4 / 9</span>
+        <span class="slide-counter">4 / 12</span>
         <div class="slide-ctrl-btns">
           <button class="btn-nav btn-prev">← 前へ</button>
-          <button class="btn-nav btn-next">次へ ➔</button>
+          <button class="btn-nav btn-next btn-primary-action">次へ ➔</button>
         </div>
       </div>
     </section>
 
-    <!-- スライド 5: d払い（重要） -->
+    <!-- スライド 5: 現金会計の超詳細手順 -->
     <section class="slide">
-      <span class="slide-badge" style="background: #ffe4e6; color: #e11d48;">📱 d払い決済（最重要！）</span>
-      <h2 class="slide-title">QRコード読み取り ＆ 画面目視確認の手順</h2>
+      <span class="slide-badge">💵 現金会計編 (3/4)</span>
+      <h2 class="slide-title">現金でのお会計・お釣り計算の操作手順</h2>
       <div class="slide-body">
-        <p>当店は <strong>お客様にQRコードを読み取ってもらう方式（MPM方式）</strong> です。</p>
-        <div class="alert-box">
-          ⚠️ <strong>注意</strong>: 必ずお客様のスマホで「支払い完了」画面を目視確認してから確定ボタンを押してください！
+        <div class="action-list">
+          <div class="action-item">
+            <span class="action-icon">💰</span>
+            <div class="action-content">
+              <h4>1. お預かり金額の入力</h4>
+              <p>
+                ・ピッタリの場合は <strong>「ちょうど」</strong> ボタンを1回タップ。<br/>
+                ・千円札を受け取ったら <strong>「+1,000円」</strong> をタップ（2回押すと2,000円になります）。<br/>
+                ・細かい小銭は下の <strong>テンキー</strong> で直接入力（打ち間違えたら「クリア」を押せばOK）。
+              </p>
+            </div>
+          </div>
+          <div class="action-item">
+            <span class="action-icon">🪙</span>
+            <div class="action-content">
+              <h4>2. お釣りの確認とお渡し</h4>
+              <p>
+                画面に <strong>「お釣り ¥〇〇」</strong> が緑色で大きく自動計算されます。お客様にお釣りを手渡します。<br/>
+                ※お預かり金額が足りない場合は「不足」と赤色警告が出て完了ボタンが押せません。
+              </p>
+            </div>
+          </div>
+          <div class="action-item">
+            <span class="action-icon">🎫</span>
+            <div class="action-content">
+              <h4>3. 「現金 会計完了・引換券発行」をタップ！</h4>
+              <p>
+                ボタンを押すと紙吹雪が舞い、画面に <strong>「お呼び出し番号（例: #001）」</strong> が特大表示されます！<br/>
+                お客様に「#001番でお呼び出ししますので少々お待ちください！」とお伝えし、<strong>「次の会計へ ➔」</strong> を押します。
+              </p>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="slide-footer-nav">
+        <span class="slide-counter">5 / 12</span>
+        <div class="slide-ctrl-btns">
+          <button class="btn-nav btn-prev">← 前へ</button>
+          <button class="btn-nav btn-next btn-primary-action">次へ ➔</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- スライド 6: d払い決済（最重要！） -->
+    <section class="slide">
+      <span class="slide-badge dpay">📱 d払いQR決済編 (4/4) ★超重要★</span>
+      <h2 class="slide-title">d払いはお客様のスマホ画面を目視確認！</h2>
+      <div class="slide-body">
+        <p style="font-size: 1.15rem;">
+          当店は <strong>お客様に店頭のQRコードを読み取ってもらい、金額を入力して支払ってもらう方式</strong> です。
+        </p>
+
+        <div class="alert-box">
+          ⚠️ <strong>【不正・金額ミス防止ルール】</strong><br/>
+          お客様が「支払いました」と言っても、<strong>必ず店員がスマホの「支払い完了画面」と「金額」を目視確認</strong> してから完了ボタンを押してください！
+        </div>
+
         <div class="step-grid">
           <div class="step-card">
-            <span class="step-num" style="background: #e11d48;">1</span>
-            <strong>「📱 d払い」を選択</strong>
-            <p style="font-size: 0.85rem; color: var(--text-muted);">
-              画面に特大サイズで入力してもらう金額が表示されます。
-            </p>
+            <strong style="color: #e11d48;">① 金額を伝える</strong>
+            <p>画面に特大で出ている金額（例: 850円）をお客様に伝えます。「d払いで850円になります」</p>
           </div>
           <div class="step-card">
-            <span class="step-num" style="background: #e11d48;">2</span>
-            <strong>お客様にお支払い案内</strong>
-            <p style="font-size: 0.85rem; color: var(--text-muted);">
-              レジ前QRを読み取ってもらい、指定の金額を入力して決済してもらいます。
-            </p>
+            <strong style="color: #e11d48;">② QRを読み取ってもらう</strong>
+            <p>レジ前に置いてあるd払いQRコードをお客様のスマホカメラで読み取ってもらい、金額を入力してもらいます。</p>
           </div>
           <div class="step-card">
-            <span class="step-num" style="background: #e11d48;">3</span>
-            <strong>スマホ画面を目視確認</strong>
-            <p style="font-size: 0.85rem; color: var(--text-muted);">
-              金額と完了画面を確認したら「✅ 支払い確認完了」を押します！
-            </p>
+            <strong style="color: #e11d48;">③ 完了画面を目視確認！</strong>
+            <p>「完了画面を見せていただけますか？」と確認し、POS側の緑ボタン <strong>「✅ 支払い確認完了」</strong> をタップ！</p>
           </div>
         </div>
       </div>
       <div class="slide-footer-nav">
-        <span class="slide-counter">5 / 9</span>
+        <span class="slide-counter">6 / 12</span>
         <div class="slide-ctrl-btns">
           <button class="btn-nav btn-prev">← 前へ</button>
-          <button class="btn-nav btn-next">次へ ➔</button>
+          <button class="btn-nav btn-next btn-primary-action">次へ ➔</button>
         </div>
       </div>
     </section>
 
-    <!-- スライド 6: 厨房・受渡担当 -->
+    <!-- スライド 7: 厨房・受渡の基本操作 -->
     <section class="slide">
-      <span class="slide-badge">🍳 厨房・受渡担当編</span>
-      <h2 class="slide-title">カンバンボードで注文をスムーズに進行</h2>
+      <span class="slide-badge kitchen">🍳 厨房・受渡担当編 (1/2)</span>
+      <h2 class="slide-title">カンバンボードで注文を進行する手順</h2>
       <div class="slide-body">
-        <p>上部タブの <strong>「🍳 厨房・呼出 (F2)」</strong> を開いておきます。</p>
-        <div class="step-grid" style="margin-top: 1rem;">
-          <div class="step-card">
+        <p style="font-size: 1.2rem; margin-bottom: 1rem;">
+          画面上部タブの <strong>「🍳 厨房・呼出 (F2)」</strong> を常に開いた状態で待機します。
+        </p>
+
+        <div class="step-grid">
+          <div class="step-card" style="border-left: 6px solid #f59e0b;">
             <strong style="color: #b45309;">① 🍳 調理中 / 準備中</strong>
-            <p style="font-size: 0.88rem; color: var(--text-muted);">
-              レジで会計されるとピンポーン♪と新着カードが自動表示。カードを見て調理します。
+            <p>
+              レジで会計が終わると、<strong>ピンポーン♪</strong> と音が鳴り、カードが自動追加されます。<br/>
+              注文番号（#001）、注文時刻、商品と個数を見て調理を開始します。
             </p>
           </div>
-          <div class="step-card">
-            <strong style="color: #047857;">② 🔔 調理完了・呼出</strong>
-            <p style="font-size: 0.88rem; color: var(--text-muted);">
-              ボタンを押すと右の「お渡し可能」へ移動！「#〇〇番のお客様〜！」とお呼び出しします。
+          <div class="step-card" style="border-left: 6px solid #10b981;">
+            <strong style="color: #047857;">② 🔔 調理完了・呼出する</strong>
+            <p>
+              商品が出来上がったら、カード下の <strong>「🔔 調理完了・呼出する」</strong> を押します。<br/>
+              右側の「お渡し可能」列にカードが移動します。
             </p>
           </div>
-          <div class="step-card">
-            <strong style="color: #475569;">③ ✅ お渡し完了</strong>
-            <p style="font-size: 0.88rem; color: var(--text-muted);">
-              引換券と商品を交換したらボタンを押して完了！カードがスッキリ消えます。
-            </p>
-          </div>
-        </div>
-        <div class="success-box" style="margin-top: 1rem;">
-          📢 右上の <strong>「お客様用 呼出画面」</strong> をプロジェクター等に映すと、出来上がり番号を特大表示できます！
-        </div>
-      </div>
-      <div class="slide-footer-nav">
-        <span class="slide-counter">6 / 9</span>
-        <div class="slide-ctrl-btns">
-          <button class="btn-nav btn-prev">← 前へ</button>
-          <button class="btn-nav btn-next">次へ ➔</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- スライド 7: 在庫・カテゴリー管理 -->
-    <section class="slide">
-      <span class="slide-badge">🍰 在庫・メニュー管理</span>
-      <h2 class="slide-title">クイック在庫補充 ＆ カテゴリーカスタマイズ</h2>
-      <div class="slide-body">
-        <p>上部タブの <strong>「🍰 商品管理 (F4)」</strong> で設定できます。</p>
-        <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
-          <div class="step-card">
-            <strong>📦 在庫のクイック補充（+10, +50, −5）</strong>
-            <p style="font-size: 0.88rem; color: var(--text-muted);">
-              ボタンを押すだけで即座に反映。在庫が0になると、レジで自動的に <strong>SOLD OUT</strong> になり誤注文を防止します。
-            </p>
-          </div>
-          <div class="step-card">
-            <strong>🏷️ カテゴリーの自由設定</strong>
-            <p style="font-size: 0.88rem; color: var(--text-muted);">
-              右上の「カテゴリー設定」から、新しいカテゴリ（軽食、セット、限定品など）を自由に追加・削除できます。
+          <div class="step-card" style="border-left: 6px solid #64748b;">
+            <strong style="color: #334155;">③ ✅ お渡し完了</strong>
+            <p>
+              お客様をお呼び出し（「#001番のお客様〜」）。引換券と引き換えに商品を渡し、<strong>「✅ お渡し完了」</strong> を押せば完了です！
             </p>
           </div>
         </div>
       </div>
       <div class="slide-footer-nav">
-        <span class="slide-counter">7 / 9</span>
+        <span class="slide-counter">7 / 12</span>
         <div class="slide-ctrl-btns">
           <button class="btn-nav btn-prev">← 前へ</button>
-          <button class="btn-nav btn-next">次へ ➔</button>
+          <button class="btn-nav btn-next btn-primary-action">次へ ➔</button>
         </div>
       </div>
     </section>
 
-    <!-- スライド 8: 売上分析＆CSV保存 -->
+    <!-- スライド 8: お客様呼出特大ディスプレイ -->
     <section class="slide">
-      <span class="slide-badge">📊 売上分析・精算</span>
-      <h2 class="slide-title">リアルタイム集計 ＆ スプレッドシート保存</h2>
+      <span class="slide-badge kitchen">📢 呼出ディスプレイ (2/2)</span>
+      <h2 class="slide-title">プロジェクターやモニターに特大表示！</h2>
       <div class="slide-body">
-        <p>上部タブの <strong>「📊 売上分析 (F3)」</strong> で売上状況を常時チェックできます。</p>
-        <div class="step-grid" style="margin-top: 1rem;">
+        <p style="font-size: 1.2rem; margin-bottom: 1rem;">
+          厨房画面の右上にある <strong>「📢 お客様用 呼出画面」</strong> ボタンを押すと、全画面の呼出スクリーンが開きます。
+        </p>
+
+        <div class="success-box">
+          💡 <strong>教室の外に向けたプロジェクターやテレビ、大型タブレット</strong> にこの画面を映しておくと、受渡口の混雑を完全に防げます！
+        </div>
+
+        <div class="step-grid">
+          <div class="step-card" style="border-color: #a7f3d0; background: #f0fdf4;">
+            <strong style="color: #047857; font-size: 1.3rem;">🔔 お受け取りいただけます</strong>
+            <p>
+              厨房で「呼出する」を押した番号（例: #001、#002）が <strong>特大緑色でパルス点滅</strong> します。お客様が遠くからでも一目で気付けます！
+            </p>
+          </div>
+          <div class="step-card" style="background: #f8fafc;">
+            <strong style="color: #64748b; font-size: 1.3rem;">🍳 ただいま準備中</strong>
+            <p>
+              現在調理中の番号が表示されます。「自分の番号がちゃんと通っているな」とお客様が安心して待てます。
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer-nav">
+        <span class="slide-counter">8 / 12</span>
+        <div class="slide-ctrl-btns">
+          <button class="btn-nav btn-prev">← 前へ</button>
+          <button class="btn-nav btn-next btn-primary-action">次へ ➔</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- スライド 9: 在庫補充＆カテゴリー管理 -->
+    <section class="slide">
+      <span class="slide-badge">🍰 在庫・メニュー管理編</span>
+      <h2 class="slide-title">在庫のワンタップ補充 ＆ カテゴリーカスタマイズ</h2>
+      <div class="slide-body">
+        <p style="font-size: 1.2rem; margin-bottom: 1rem;">
+          画面上部タブの <strong>「🍰 商品管理 (F4)」</strong> で設定を行います。
+        </p>
+
+        <div class="action-list">
+          <div class="action-item">
+            <span class="action-icon">⚡</span>
+            <div class="action-content">
+              <h4>1. ワンタップでのクイック在庫補充（+10, +50, −5）</h4>
+              <p>
+                材料を追加仕込みした時は、表の <strong>「+10」「+50」</strong> ボタンを押すだけで即座に反映されます。<br/>
+                在庫が0になると、レジ画面で自動的に <strong>「SOLD OUT」</strong> になり、タップできなくなるので売りすぎ事故が起きません！
+              </p>
+            </div>
+          </div>
+          <div class="action-item">
+            <span class="action-icon">🏷️</span>
+            <div class="action-content">
+              <h4>2. カテゴリーの自由設定</h4>
+              <p>
+                右上の <strong>「🏷️ カテゴリー設定」</strong> ボタンを押して、新しいカテゴリ（例: `軽食`、`セット`、`トッピング` など）を入力して「追加」を押すだけ！レジの絞り込みバーに即時反映されます。
+              </p>
+            </div>
+          </div>
+          <div class="action-item">
+            <span class="action-icon">✏️</span>
+            <div class="action-content">
+              <h4>3. 商品の追加・価格の変更</h4>
+              <p>「編集」ボタンで価格の改定や説明文の追加ができます。「＋ 新しい商品を追加」で新メニューも作れます。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer-nav">
+        <span class="slide-counter">9 / 12</span>
+        <div class="slide-ctrl-btns">
+          <button class="btn-nav btn-prev">← 前へ</button>
+          <button class="btn-nav btn-next btn-primary-action">次へ ➔</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- スライド 10: 売上分析＆レジ締め -->
+    <section class="slide">
+      <span class="slide-badge">📊 売上分析・精算編</span>
+      <h2 class="slide-title">リアルタイム集計 ＆ スプレッドシート出力</h2>
+      <div class="slide-body">
+        <p style="font-size: 1.2rem; margin-bottom: 1rem;">
+          画面上部タブの <strong>「📊 売上分析 (F3)」</strong> を開きます。
+        </p>
+
+        <div class="step-grid">
           <div class="step-card">
-            <strong>💰 決済別売上内訳</strong>
-            <p style="font-size: 0.88rem; color: var(--text-muted);">
-              総売上だけでなく、「現金売上」と「d払い売上」の金額がリアルタイムに分かります。
+            <strong>💰 決済別の売上金額</strong>
+            <p style="font-size: 1.05rem;">
+              ・<strong>💵 現金売上</strong>: レジの現金を数える時に、この金額と一致しているかチェックします。<br/>
+              ・<strong>📱 d払い売上</strong>: キャッシュレス分の売上がひと目で分かります。
             </p>
           </div>
           <div class="step-card">
             <strong>📈 時間帯グラフ・ランキング</strong>
-            <p style="font-size: 0.88rem; color: var(--text-muted);">
-              いつがピークだったか、どの一品が一番売れたかがグラフで一目瞭然です。
+            <p style="font-size: 1.05rem;">
+              何時台が一番混雑したか、クレープとドリンクどちらが人気だったかがリアルタイムグラフで分かります。
             </p>
           </div>
           <div class="step-card">
             <strong>📥 CSVエクスポート</strong>
-            <p style="font-size: 0.88rem; color: var(--text-muted);">
-              ボタンを1回押すだけで、ExcelやGoogleスプレッドシートで開けるCSVファイルを保存できます！
+            <p style="font-size: 1.05rem;">
+              右上の <strong>「CSVエクスポート」</strong> を押すと、全明細がExcelやGoogleスプレッドシートで文字化けせず開けるファイルとして一発保存されます！
             </p>
           </div>
         </div>
       </div>
       <div class="slide-footer-nav">
-        <span class="slide-counter">8 / 9</span>
+        <span class="slide-counter">10 / 12</span>
         <div class="slide-ctrl-btns">
           <button class="btn-nav btn-prev">← 前へ</button>
-          <button class="btn-nav btn-next">次へ ➔</button>
+          <button class="btn-nav btn-next btn-primary-action">次へ ➔</button>
         </div>
       </div>
     </section>
 
-    <!-- スライド 9: トラブルシューティング -->
+    <!-- スライド 11: 設定画面 -->
     <section class="slide">
-      <span class="slide-badge">🛠️ トラブルシューティング</span>
-      <h2 class="slide-title">困ったときの対応マニュアル</h2>
+      <span class="slide-badge">⚙️ 端末設定・データリセット</span>
+      <h2 class="slide-title">端末ごとの名前設定 ＆ テストデータ消去</h2>
       <div class="slide-body">
-        <div style="display: flex; flex-direction: column; gap: 0.85rem;">
-          <div class="highlight-box" style="margin: 0;">
-            <strong>Q1. 画面が動かなくなった・固まった？</strong><br/>
-            👉 ブラウザを「再読み込み（リロード）」してください。データはすべてクラウドに安全に保存されているため消えません！
+        <p style="font-size: 1.2rem; margin-bottom: 1rem;">
+          画面上部タブの <strong>「⚙️ 設定 (F5)」</strong> を開きます。
+        </p>
+
+        <div class="action-list">
+          <div class="action-item">
+            <span class="action-icon">💻</span>
+            <div class="action-content">
+              <h4>1. 端末の役割・名称の変更</h4>
+              <p>
+                「レジ-1」「レジ-2」「厨房iPad」など端末名を入力して保存できます。注文履歴や厨房カードにどの端末から入ったかが表示されるので便利です。
+              </p>
+            </div>
           </div>
-          <div class="alert-box" style="margin: 0;">
-            <strong>Q2. 会計を間違えて確定してしまった！</strong><br/>
-            👉 厨房担当に口頭で「#〇〇番はキャンセルです」と伝えてください。厨房画面で完了ボタンを押して片付けます。
+          <div class="action-item">
+            <span class="action-icon">🔊</span>
+            <div class="action-content">
+              <h4>2. 効果音のON / OFF</h4>
+              <p>レジ打ち音や厨房のピンポーンチャイム音を端末ごとにミュート・有効化できます。</p>
+            </div>
           </div>
-          <div class="success-box" style="margin: 0;">
-            <strong>Q3. ネットが途切れたら？</strong><br/>
-            👉 そのまま操作を続けて大丈夫です。電波が回復した瞬間に自動的に全データが同期されます。
+          <div class="action-item">
+            <span class="action-icon">🗑️</span>
+            <div class="action-content">
+              <h4>3. 文化祭本番前のテストデータ消去</h4>
+              <p>
+                練習やテストで打った注文データは、一番下の <strong>「売上・注文履歴のみをクリア」</strong> を押せば一発で0件にリセットできます！（商品メニューやカテゴリーは消えないので安心です）。
+              </p>
+            </div>
           </div>
         </div>
       </div>
       <div class="slide-footer-nav">
-        <span class="slide-counter">9 / 9 (完了)</span>
+        <span class="slide-counter">11 / 12</span>
         <div class="slide-ctrl-btns">
           <button class="btn-nav btn-prev">← 前へ</button>
-          <a href="/" class="btn-nav" style="background: var(--primary); color: white; border: none; text-decoration: none;">🎉 POSレジへ移動</a>
+          <button class="btn-nav btn-next btn-primary-action">次へ ➔</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- スライド 12: トラブル対応 -->
+    <section class="slide">
+      <span class="slide-badge">🛠️ 緊急トラブルシューティング</span>
+      <h2 class="slide-title">当日に困ったときの対応マニュアル</h2>
+      <div class="slide-body">
+        <div class="action-list">
+          <div class="highlight-box" style="margin: 0;">
+            <strong style="color: #ea580c; font-size: 1.2rem;">Q1. 画面が動かなくなった・固まった？</strong><br/>
+            👉 <strong>ブラウザの「再読み込み（リロード）」</strong> を押してください！データはクラウド（Firebase）に安全に保管されているため、リロードしてもデータは一切消えません。
+          </div>
+          <div class="alert-box" style="margin: 0;">
+            <strong style="color: #e11d48; font-size: 1.2rem;">Q2. 注文を間違えて会計確定してしまった！</strong><br/>
+            👉 すぐに厨房担当に口頭で「#〇〇番はキャンセル！」と伝えてください。厨房画面で「✅ お渡し完了」を押せば注文カードは片付きます。
+          </div>
+          <div class="success-box" style="margin: 0;">
+            <strong style="color: #065f46; font-size: 1.2rem;">Q3. 学校のWi-Fiが一時的に切れた！</strong><br/>
+            👉 画面はそのまま操作を続けて大丈夫です。電波が戻った瞬間に自動的にクラウドと再同期されます。
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer-nav">
+        <span class="slide-counter">12 / 12 (完了)</span>
+        <div class="slide-ctrl-btns">
+          <button class="btn-nav btn-prev">← 前へ</button>
+          <a href="/" class="btn-nav btn-primary-action" style="text-decoration: none;">🎉 レジ本番画面へ</a>
         </div>
       </div>
     </section>
@@ -621,6 +900,7 @@
       });
       currentIndex = index;
       progressBar.style.width = `${((index + 1) / slides.length) * 100}%`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // 次へ / 前へボタンのイベント
@@ -658,9 +938,9 @@
     document.addEventListener('touchend', (e) => {
       touchEndX = e.changedTouches[0].screenX;
       if (touchStartX - touchEndX > 50) {
-        showSlide(currentIndex + 1); // 左スワイプで次へ
+        showSlide(currentIndex + 1);
       } else if (touchEndX - touchStartX > 50) {
-        showSlide(currentIndex - 1); // 右スワイプで前へ
+        showSlide(currentIndex - 1);
       }
     }, false);
   </script>
