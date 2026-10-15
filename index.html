@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>1-16 カフェ 文化祭レジシステム | スマートPOS & 厨房管理</title>
+    <meta name="description" content="文化祭の模擬店（カフェ・クレープ・ドリンク）に特化した高機能スマートPOSレジシステム。お釣り自動計算、引換券発行、リアルタイム厨房モニター、Firebase Realtime Database連携、複数端末同期、Vercelデプロイ対応。" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☕</text></svg>" />
+  </head>
+  <body>
+    <!-- ヘッダーナビゲーション -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-logo">☕</div>
+        <div class="brand-info">
+          <h1 id="headerStoreTitle">1-16 カフェ</h1>
+          <span class="badge-terminal">
+            <span style="font-size: 0.65rem;">💻</span>
+            <span id="headerTerminalBadge">レジ</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- ナビゲーションタブ -->
+      <nav class="nav-tabs" aria-label="POS Navigation">
+        <button class="nav-tab-btn active" data-tab="register" id="tabRegister">
+          <span>🛒</span>
+          <span>お会計 (F1)</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="kitchen" id="tabKitchen">
+          <span>🍳</span>
+          <span>厨房・呼出 (F2)</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="analytics" id="tabAnalytics">
+          <span>📊</span>
+          <span>売上分析 (F3)</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="menu" id="tabMenu">
+          <span>🍰</span>
+          <span>商品管理 (F4)</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="settings" id="tabSettings">
+          <span>⚙️</span>
+          <span>設定・同期 (F5)</span>
+        </button>
+      </nav>
+
+      <!-- ヘッダーステータス -->
+      <div class="header-status">
+        <div class="sync-status-indicator" id="headerSyncIndicator" title="P2P同期状態">
+          <div class="status-dot" id="headerSyncDot"></div>
+          <span id="headerSyncText">待機中</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- メイン表示領域 -->
+    <main class="main-viewport">
+      <!-- レジ会計ビュー -->
+      <section class="view-section active" id="viewRegister" aria-labelledby="tabRegister"></section>
+
+      <!-- 厨房・受渡ビュー -->
+      <section class="view-section" id="viewKitchen" aria-labelledby="tabKitchen"></section>
+
+      <!-- 売上集計ビュー -->
+      <section class="view-section" id="viewAnalytics" aria-labelledby="tabAnalytics"></section>
+
+      <!-- 商品管理ビュー -->
+      <section class="view-section" id="viewMenu" aria-labelledby="tabMenu"></section>
+
+      <!-- 設定・同期ビュー -->
+      <section class="view-section" id="viewSettings" aria-labelledby="tabSettings"></section>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
