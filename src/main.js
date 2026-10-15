@@ -3,6 +3,7 @@ import { store } from './state.js';
 import { firebaseManager } from './firebase.js';
 import { RegisterComponent } from './components/register.js';
 import { KitchenComponent } from './components/kitchen.js';
+import { CallDisplayComponent } from './components/callDisplay.js';
 import { AnalyticsComponent } from './components/analytics.js';
 import { MenuManagerComponent } from './components/menuManager.js';
 import { SettingsComponent } from './components/settings.js';
@@ -64,6 +65,7 @@ class App {
   setupComponents() {
     new RegisterComponent(document.getElementById('viewRegister'));
     new KitchenComponent(document.getElementById('viewKitchen'));
+    new CallDisplayComponent(document.getElementById('viewCall'));
     new AnalyticsComponent(document.getElementById('viewAnalytics'));
     new MenuManagerComponent(document.getElementById('viewMenu'));
     new SettingsComponent(document.getElementById('viewSettings'));
@@ -76,13 +78,13 @@ class App {
     tabButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
         const tab = btn.dataset.tab;
-        this.switchTab(tab);
+        if (tab) this.switchTab(tab);
       });
     });
 
     // URLハッシュまたはパラメータによるタブ指定
     const hash = window.location.hash.replace('#', '');
-    if (['register', 'kitchen', 'analytics', 'menu', 'settings'].includes(hash)) {
+    if (['register', 'kitchen', 'call', 'analytics', 'menu', 'settings'].includes(hash)) {
       this.switchTab(hash);
     }
   }
@@ -103,13 +105,8 @@ class App {
     window.location.hash = tab;
   }
 
-  initP2P() {
-    p2p.setupBroadcastChannel();
-    p2p.init();
-  }
-
   setupKeyboardShortcuts() {
-    // F1〜F5キーでタブ切り替え
+    // F1〜F6キーでタブ切り替え
     window.addEventListener('keydown', (e) => {
       if (e.key === 'F1') {
         e.preventDefault();
@@ -119,13 +116,14 @@ class App {
         this.switchTab('kitchen');
       } else if (e.key === 'F3') {
         e.preventDefault();
-        this.switchTab('analytics');
+        this.switchTab('call');
       } else if (e.key === 'F4') {
         e.preventDefault();
+        this.switchTab('analytics');
+      } else if (e.key === 'F5' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
         this.switchTab('menu');
-      } else if (e.key === 'F5' && e.ctrlKey) {
-        // 通常のリロード許可
-      } else if (e.key === 'F5') {
+      } else if (e.key === 'F6') {
         e.preventDefault();
         this.switchTab('settings');
       }

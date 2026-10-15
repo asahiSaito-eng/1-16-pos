@@ -26,17 +26,18 @@ export class KitchenComponent {
         <div class="kitchen-toolbar">
           <div class="kitchen-stats-pills">
             <div class="k-stat-pill cooking">
-              <span>🍳 調理中:</span>
+              <span>🍳 調理待ち:</span>
               <strong id="kStatCookingCount">0件</strong>
             </div>
             <div class="k-stat-pill ready">
-              <span>🔔 お渡し可能:</span>
+              <span>🔔 呼出・お渡し中:</span>
               <strong id="kStatReadyCount">0件</strong>
             </div>
           </div>
-          <div>
-            <button class="btn-primary" id="btnOpenCallDisplay">
-              <span>📢 お客様用 呼出画面</span>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">※番号の若い順（昇順）に上から表示されます</span>
+            <button class="btn-primary" id="btnGoToCallDisplay" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);">
+              <span>📢 呼出モニター画面へ (F3)</span>
             </button>
           </div>
         </div>
@@ -48,7 +49,7 @@ export class KitchenComponent {
             <div class="col-header cooking">
               <h3 class="col-title">
                 <span>🍳</span>
-                <span>調理中 / 準備中</span>
+                <span>調理中 / 準備中（番号順）</span>
               </h3>
               <span id="colCookingBadge" style="font-weight: 800; font-size: 0.9rem;">0件</span>
             </div>
@@ -60,38 +61,11 @@ export class KitchenComponent {
             <div class="col-header ready">
               <h3 class="col-title">
                 <span>🔔</span>
-                <span>お渡し可能（呼出中）</span>
+                <span>お渡し可能（呼出中・番号順）</span>
               </h3>
               <span id="colReadyBadge" style="font-weight: 800; font-size: 0.9rem;">0件</span>
             </div>
             <div class="orders-flow-container" id="readyOrdersList"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- お客様用呼出特大ディスプレイモーダル -->
-      <div class="modal-overlay" id="callDisplayModal">
-        <div class="call-display-modal">
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 1rem;">
-            <h2 style="font-size: 1.6rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
-              <span>📢</span>
-              <span>出来上がり呼出状況</span>
-            </h2>
-            <button class="modal-close-btn" style="color: white;" id="btnCloseCallDisplay">&times;</button>
-          </div>
-
-          <div class="call-display-grid">
-            <!-- 呼出中（お渡し可能） -->
-            <div class="call-block" style="border: 2px solid #10b981;">
-              <h3 class="call-block-title" style="color: #34d399;">🔔 お受け取りいただけます</h3>
-              <div class="call-number-tags" id="callReadyNumbersContainer"></div>
-            </div>
-
-            <!-- 調理中 -->
-            <div class="call-block">
-              <h3 class="call-block-title" style="color: #94a3b8;">🍳 ただいま準備中</h3>
-              <div class="call-number-tags" id="callCookingNumbersContainer"></div>
-            </div>
           </div>
         </div>
       </div>
@@ -102,8 +76,30 @@ export class KitchenComponent {
 
   updateOrdersView() {
     const orders = store.get().orders || [];
-    const cookingOrders = orders.filter((o) => o.status === 'cooking');
-    const readyOrders = orders.filter((o) => o.status === 'ready');
+    let cookingOrders = orders.filter((o) => o.status === 'cooking');
+    let readyOrders = orders.filter((o) => o.status === 'ready');
+
+    // 注文番号を数値としてパース（例: '#003' -> 3, 'A-012' -> 12）
+    const parseOrderNum = (order) => {
+      if (!order || !order.orderNumber) return 0;
+      const num = parseInt(String(order.orderNumber).replace(/[^0-9]/g, ''), 10);
+      return isNaN(num) ? 0 : num;
+    };
+
+    // ★重要: 番号が若い順（昇順: #001 -> #002 -> #003）にソートして一番上に表示
+    cookingOrders.sort((a, b) => {
+      const numA = parseOrderNum(a);
+      const numB = parseOrderNum(b);
+      if (numA !== numB) return numA - numB;
+      return (a.timestamp || 0) - (b.timestamp || 0);
+    });
+
+    readyOrders.sort((a, b) => {
+      const numA = parseOrderNum(a);
+      const numB = parseOrderNum(b);
+      if (numA !== numB) return numA - numB;
+      return (a.timestamp || 0) - (b.timestamp || 0);
+    });
 
     // 件数更新
     this.container.querySelector('#kStatCookingCount').textContent = `${cookingOrders.length}件`;
@@ -156,9 +152,6 @@ export class KitchenComponent {
         firebaseManager.updateOrderStatus(orderId, 'delivered');
       });
     });
-
-    // 呼出モニターの数字更新
-    this.updateCallDisplayNumbers(cookingOrders, readyOrders);
   }
 
   renderOrderCard(order, type) {
@@ -199,38 +192,9 @@ export class KitchenComponent {
     `;
   }
 
-  updateCallDisplayNumbers(cookingOrders, readyOrders) {
-    const readyContainer = this.container.querySelector('#callReadyNumbersContainer');
-    const cookingContainer = this.container.querySelector('#callCookingNumbersContainer');
-
-    if (readyContainer) {
-      if (readyOrders.length === 0) {
-        readyContainer.innerHTML = '<span style="color: #64748b; font-size: 1.1rem;">お呼び出し中の番号はありません</span>';
-      } else {
-        readyContainer.innerHTML = readyOrders.map((o) => `
-          <span class="call-tag ready-tag">${o.orderNumber}</span>
-        `).join('');
-      }
-    }
-
-    if (cookingContainer) {
-      if (cookingOrders.length === 0) {
-        cookingContainer.innerHTML = '<span style="color: #64748b; font-size: 1.1rem;">準備中の注文はありません</span>';
-      } else {
-        cookingContainer.innerHTML = cookingOrders.map((o) => `
-          <span class="call-tag cooking-tag">${o.orderNumber}</span>
-        `).join('');
-      }
-    }
-  }
-
   setupEventListeners() {
-    const callModal = this.container.querySelector('#callDisplayModal');
-    this.container.querySelector('#btnOpenCallDisplay')?.addEventListener('click', () => {
-      callModal.classList.add('active');
-    });
-    this.container.querySelector('#btnCloseCallDisplay')?.addEventListener('click', () => {
-      callModal.classList.remove('active');
+    this.container.querySelector('#btnGoToCallDisplay')?.addEventListener('click', () => {
+      document.getElementById('tabCall')?.click();
     });
   }
 }

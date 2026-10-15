@@ -651,23 +651,28 @@
       <span class="slide-badge kitchen">🍳 厨房・受渡担当編 (1/2)</span>
       <h2 class="slide-title">カンバンボードで注文を進行する手順</h2>
       <div class="slide-body">
-        <p style="font-size: 1.2rem; margin-bottom: 1rem;">
-          画面上部タブの <strong>「🍳 厨房・呼出 (F2)」</strong> を常に開いた状態で待機します。
+        <p style="font-size: 1.2rem; margin-bottom: 0.75rem;">
+          画面上部タブの <strong>「🍳 厨房 (F2)」</strong> を常に開いた状態で待機します。
         </p>
+
+        <div class="tip-box" style="margin-bottom: 1rem; border-color: #38bdf8; background: #f0f9ff; color: #0369a1;">
+          ⭐ <strong>【注文番号が若い順に一番上に並びます！】</strong><br/>
+          調理中・呼出中のカードは、<strong>番号が若い順（#001 ➔ #002 ➔ #003... 昇順）</strong> で上から自動整列されます。一番上の注文から順に調理すれば、先入れ先出し（FIFO）で順番を間違えずに対応できます！
+        </div>
 
         <div class="step-grid">
           <div class="step-card" style="border-left: 6px solid #f59e0b;">
-            <strong style="color: #b45309;">① 🍳 調理中 / 準備中</strong>
+            <strong style="color: #b45309;">① 🍳 調理中 / 準備中（一番上から調理）</strong>
             <p>
               レジで会計が終わると、<strong>ピンポーン♪</strong> と音が鳴り、カードが自動追加されます。<br/>
-              注文番号（#001）、注文時刻、商品と個数を見て調理を開始します。
+              <strong>一番上の若い番号</strong> から順に商品と個数を見て調理を開始します。
             </p>
           </div>
           <div class="step-card" style="border-left: 6px solid #10b981;">
             <strong style="color: #047857;">② 🔔 調理完了・呼出する</strong>
             <p>
               商品が出来上がったら、カード下の <strong>「🔔 調理完了・呼出する」</strong> を押します。<br/>
-              右側の「お渡し可能」列にカードが移動します。
+              右側の「お渡し可能」列にカードが移動し、呼出モニター側にも即時反映されます。
             </p>
           </div>
           <div class="step-card" style="border-left: 6px solid #64748b;">
@@ -689,28 +694,28 @@
 
     <!-- スライド 8: お客様呼出特大ディスプレイ -->
     <section class="slide">
-      <span class="slide-badge kitchen">📢 呼出ディスプレイ (2/2)</span>
-      <h2 class="slide-title">プロジェクターやモニターに特大表示！</h2>
+      <span class="slide-badge kitchen">📢 呼出モニター編 (2/2)</span>
+      <h2 class="slide-title">独立した専用画面！プロジェクターやモニターに特大表示</h2>
       <div class="slide-body">
-        <p style="font-size: 1.2rem; margin-bottom: 1rem;">
-          厨房画面の右上にある <strong>「📢 お客様用 呼出画面」</strong> ボタンを押すと、全画面の呼出スクリーンが開きます。
+        <p style="font-size: 1.2rem; margin-bottom: 0.75rem;">
+          画面上部タブの <strong>「📢 呼出モニター (F3)」</strong> を開くと、お客様向けの独立した専用大画面になります。
         </p>
 
-        <div class="success-box">
-          💡 <strong>教室の外に向けたプロジェクターやテレビ、大型タブレット</strong> にこの画面を映しておくと、受渡口の混雑を完全に防げます！
+        <div class="success-box" style="margin-bottom: 1rem;">
+          💡 <strong>教室の外に向けたプロジェクターやテレビ、大型タブレット</strong> での投影に最適！右上の <strong>「⛶ 全画面」</strong> ボタンでフルスクリーン表示できます。受渡口の混雑を完全に防げます！
         </div>
 
         <div class="step-grid">
           <div class="step-card" style="border-color: #a7f3d0; background: #f0fdf4;">
-            <strong style="color: #047857; font-size: 1.3rem;">🔔 お受け取りいただけます</strong>
+            <strong style="color: #047857; font-size: 1.3rem;">🔔 お受け取りいただけます（番号順）</strong>
             <p>
-              厨房で「呼出する」を押した番号（例: #001、#002）が <strong>特大緑色でパルス点滅</strong> します。お客様が遠くからでも一目で気付けます！
+              出来上がった番号（例: #001、#002）が <strong>番号が若い順（昇順）</strong> に特大緑色でパルス点滅！新たに呼び出された瞬間にはチャイム音（ピンポーン）が鳴り響きます。
             </p>
           </div>
           <div class="step-card" style="background: #f8fafc;">
-            <strong style="color: #64748b; font-size: 1.3rem;">🍳 ただいま準備中</strong>
+            <strong style="color: #64748b; font-size: 1.3rem;">🍳 ただいま準備中（番号順）</strong>
             <p>
-              現在調理中の番号が表示されます。「自分の番号がちゃんと通っているな」とお客様が安心して待てます。
+              現在調理中の番号が <strong>番号が若い順（昇順）</strong> に表示されます。「自分の番号がちゃんと通っているな」とお客様が安心して待てます。
             </p>
           </div>
         </div>
@@ -724,13 +729,53 @@
       </div>
     </section>
 
-    <!-- スライド 9: 在庫補充＆カテゴリー管理 -->
+    <!-- スライド 9: 売上分析＆レジ締め -->
+    <section class="slide">
+      <span class="slide-badge">📊 売上分析・精算編</span>
+      <h2 class="slide-title">リアルタイム集計 ＆ スプレッドシート出力</h2>
+      <div class="slide-body">
+        <p style="font-size: 1.2rem; margin-bottom: 1rem;">
+          画面上部タブの <strong>「📊 売上分析 (F4)」</strong> を開きます。
+        </p>
+
+        <div class="step-grid">
+          <div class="step-card">
+            <strong>💰 決済別の売上金額</strong>
+            <p style="font-size: 1.05rem;">
+              ・<strong>💵 現金売上</strong>: レジの現金を数える時に、この金額と一致しているかチェックします。<br/>
+              ・<strong>📱 d払い売上</strong>: キャッシュレス分の売上がひと目で分かります。
+            </p>
+          </div>
+          <div class="step-card">
+            <strong>📈 時間帯グラフ・ランキング</strong>
+            <p style="font-size: 1.05rem;">
+              何時台が一番混雑したか、クレープとドリンクどちらが人気だったかがリアルタイムグラフで分かります。
+            </p>
+          </div>
+          <div class="step-card">
+            <strong>📥 CSVエクスポート</strong>
+            <p style="font-size: 1.05rem;">
+              右上の <strong>「CSVエクスポート」</strong> を押すと、全明細がExcelやGoogleスプレッドシートで文字化けせず開けるファイルとして一発保存されます！
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer-nav">
+        <span class="slide-counter">9 / 12</span>
+        <div class="slide-ctrl-btns">
+          <button class="btn-nav btn-prev">← 前へ</button>
+          <button class="btn-nav btn-next btn-primary-action">次へ ➔</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- スライド 10: 在庫補充＆カテゴリー管理 -->
     <section class="slide">
       <span class="slide-badge">🍰 在庫・メニュー管理編</span>
       <h2 class="slide-title">在庫のワンタップ補充 ＆ カテゴリーカスタマイズ</h2>
       <div class="slide-body">
         <p style="font-size: 1.2rem; margin-bottom: 1rem;">
-          画面上部タブの <strong>「🍰 商品管理 (F4)」</strong> で設定を行います。
+          画面上部タブの <strong>「🍰 商品管理 (F5)」</strong> で設定を行います。
         </p>
 
         <div class="action-list">
@@ -763,46 +808,6 @@
         </div>
       </div>
       <div class="slide-footer-nav">
-        <span class="slide-counter">9 / 12</span>
-        <div class="slide-ctrl-btns">
-          <button class="btn-nav btn-prev">← 前へ</button>
-          <button class="btn-nav btn-next btn-primary-action">次へ ➔</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- スライド 10: 売上分析＆レジ締め -->
-    <section class="slide">
-      <span class="slide-badge">📊 売上分析・精算編</span>
-      <h2 class="slide-title">リアルタイム集計 ＆ スプレッドシート出力</h2>
-      <div class="slide-body">
-        <p style="font-size: 1.2rem; margin-bottom: 1rem;">
-          画面上部タブの <strong>「📊 売上分析 (F3)」</strong> を開きます。
-        </p>
-
-        <div class="step-grid">
-          <div class="step-card">
-            <strong>💰 決済別の売上金額</strong>
-            <p style="font-size: 1.05rem;">
-              ・<strong>💵 現金売上</strong>: レジの現金を数える時に、この金額と一致しているかチェックします。<br/>
-              ・<strong>📱 d払い売上</strong>: キャッシュレス分の売上がひと目で分かります。
-            </p>
-          </div>
-          <div class="step-card">
-            <strong>📈 時間帯グラフ・ランキング</strong>
-            <p style="font-size: 1.05rem;">
-              何時台が一番混雑したか、クレープとドリンクどちらが人気だったかがリアルタイムグラフで分かります。
-            </p>
-          </div>
-          <div class="step-card">
-            <strong>📥 CSVエクスポート</strong>
-            <p style="font-size: 1.05rem;">
-              右上の <strong>「CSVエクスポート」</strong> を押すと、全明細がExcelやGoogleスプレッドシートで文字化けせず開けるファイルとして一発保存されます！
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="slide-footer-nav">
         <span class="slide-counter">10 / 12</span>
         <div class="slide-ctrl-btns">
           <button class="btn-nav btn-prev">← 前へ</button>
@@ -817,7 +822,7 @@
       <h2 class="slide-title">端末ごとの名前設定 ＆ テストデータ消去</h2>
       <div class="slide-body">
         <p style="font-size: 1.2rem; margin-bottom: 1rem;">
-          画面上部タブの <strong>「⚙️ 設定 (F5)」</strong> を開きます。
+          画面上部タブの <strong>「⚙️ 設定 (F6)」</strong> を開きます。
         </p>
 
         <div class="action-list">
