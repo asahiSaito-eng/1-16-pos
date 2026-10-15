@@ -3,7 +3,7 @@ import { store } from './state.js';
 import { firebaseManager } from './firebase.js';
 import { RegisterComponent } from './components/register.js';
 import { KitchenComponent } from './components/kitchen.js';
-import { CallDisplayComponent } from './components/callDisplay.js';
+import { DeliveryComponent } from './components/delivery.js';
 import { AnalyticsComponent } from './components/analytics.js';
 import { MenuManagerComponent } from './components/menuManager.js';
 import { SettingsComponent } from './components/settings.js';
@@ -65,7 +65,7 @@ class App {
   setupComponents() {
     new RegisterComponent(document.getElementById('viewRegister'));
     new KitchenComponent(document.getElementById('viewKitchen'));
-    new CallDisplayComponent(document.getElementById('viewCall'));
+    new DeliveryComponent(document.getElementById('viewDelivery'));
     new AnalyticsComponent(document.getElementById('viewAnalytics'));
     new MenuManagerComponent(document.getElementById('viewMenu'));
     new SettingsComponent(document.getElementById('viewSettings'));
@@ -84,7 +84,7 @@ class App {
 
     // URLハッシュまたはパラメータによるタブ指定
     const hash = window.location.hash.replace('#', '');
-    if (['register', 'kitchen', 'call', 'analytics', 'menu', 'settings'].includes(hash)) {
+    if (['register', 'kitchen', 'delivery', 'analytics', 'menu', 'settings'].includes(hash)) {
       this.switchTab(hash);
     }
   }
@@ -116,7 +116,7 @@ class App {
         this.switchTab('kitchen');
       } else if (e.key === 'F3') {
         e.preventDefault();
-        this.switchTab('call');
+        this.switchTab('delivery');
       } else if (e.key === 'F4') {
         e.preventDefault();
         this.switchTab('analytics');

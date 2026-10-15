@@ -21,7 +21,7 @@ export class KitchenComponent {
 
   render() {
     this.container.innerHTML = `
-      <div class="kitchen-view-container">
+      <div class="kitchen-view-container single-stage-container">
         <!-- ツールバー -->
         <div class="kitchen-toolbar">
           <div class="kitchen-stats-pills">
@@ -29,44 +29,29 @@ export class KitchenComponent {
               <span>🍳 調理待ち:</span>
               <strong id="kStatCookingCount">0件</strong>
             </div>
-            <div class="k-stat-pill ready">
-              <span>🔔 呼出・お渡し中:</span>
-              <strong id="kStatReadyCount">0件</strong>
-            </div>
+            <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 700; margin-left: 0.5rem;">
+              ※番号の若い順（#001〜）に一番上から並びます
+            </span>
           </div>
-          <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">※番号の若い順（昇順）に上から表示されます</span>
-            <button class="btn-primary" id="btnGoToCallDisplay" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);">
-              <span>📢 呼出モニター画面へ (F3)</span>
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <button class="btn-primary" id="btnGoToDeliveryTab" style="background: linear-gradient(135deg, #10b981, #059669);">
+              <span>🔔 お渡し可能画面へ (F3) ➔</span>
             </button>
           </div>
         </div>
 
-        <!-- カンバンボード -->
-        <div class="kitchen-columns-grid">
-          <!-- 調理中列 -->
-          <div class="kitchen-col">
-            <div class="col-header cooking">
-              <h3 class="col-title">
-                <span>🍳</span>
-                <span>調理中 / 準備中（番号順）</span>
+        <!-- 調理待ちカード一覧 -->
+        <div class="single-stage-board">
+          <div class="single-stage-header cooking-header">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <span style="font-size: 1.5rem;">🍳</span>
+              <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #b45309;">
+                調理中・準備中オーダー（先入れ先出し・番号順）
               </h3>
-              <span id="colCookingBadge" style="font-weight: 800; font-size: 0.9rem;">0件</span>
             </div>
-            <div class="orders-flow-container" id="cookingOrdersList"></div>
+            <span id="colCookingBadge" class="badge-count-pill cooking-pill">0件</span>
           </div>
-
-          <!-- お渡し可能（呼出中）列 -->
-          <div class="kitchen-col">
-            <div class="col-header ready">
-              <h3 class="col-title">
-                <span>🔔</span>
-                <span>お渡し可能（呼出中・番号順）</span>
-              </h3>
-              <span id="colReadyBadge" style="font-weight: 800; font-size: 0.9rem;">0件</span>
-            </div>
-            <div class="orders-flow-container" id="readyOrdersList"></div>
-          </div>
+          <div class="orders-cards-grid" id="cookingOrdersList"></div>
         </div>
       </div>
     `;
@@ -77,7 +62,6 @@ export class KitchenComponent {
   updateOrdersView() {
     const orders = store.get().orders || [];
     let cookingOrders = orders.filter((o) => o.status === 'cooking');
-    let readyOrders = orders.filter((o) => o.status === 'ready');
 
     // 注文番号を数値としてパース（例: '#003' -> 3, 'A-012' -> 12）
     const parseOrderNum = (order) => {
@@ -94,47 +78,32 @@ export class KitchenComponent {
       return (a.timestamp || 0) - (b.timestamp || 0);
     });
 
-    readyOrders.sort((a, b) => {
-      const numA = parseOrderNum(a);
-      const numB = parseOrderNum(b);
-      if (numA !== numB) return numA - numB;
-      return (a.timestamp || 0) - (b.timestamp || 0);
-    });
-
     // 件数更新
-    this.container.querySelector('#kStatCookingCount').textContent = `${cookingOrders.length}件`;
-    this.container.querySelector('#kStatReadyCount').textContent = `${readyOrders.length}件`;
-    this.container.querySelector('#colCookingBadge').textContent = `${cookingOrders.length}件`;
-    this.container.querySelector('#colReadyBadge').textContent = `${readyOrders.length}件`;
+    const countText = `${cookingOrders.length}件`;
+    const countEl = this.container.querySelector('#kStatCookingCount');
+    const badgeEl = this.container.querySelector('#colCookingBadge');
+    if (countEl) countEl.textContent = countText;
+    if (badgeEl) badgeEl.textContent = countText;
 
     const cookingList = this.container.querySelector('#cookingOrdersList');
-    const readyList = this.container.querySelector('#readyOrdersList');
+    if (!cookingList) return;
 
     // 調理中リスト描画
     if (cookingOrders.length === 0) {
       cookingList.innerHTML = `
-        <div style="text-align: center; color: var(--text-muted); margin: auto; padding: 2rem;">
-          <span style="font-size: 2rem;">✨</span>
-          <p>調理待ちの注文はありません</p>
+        <div class="empty-orders-placeholder">
+          <span style="font-size: 3rem;">✨</span>
+          <p style="font-size: 1.2rem; font-weight: 700; color: var(--text-muted); margin: 0.5rem 0 0 0;">
+            現在、調理待ちの注文はありません
+          </p>
+          <span style="font-size: 0.85rem; color: #94a3b8;">レジで会計されると自動でここに表示されます</span>
         </div>
       `;
     } else {
-      cookingList.innerHTML = cookingOrders.map((o) => this.renderOrderCard(o, 'cooking')).join('');
+      cookingList.innerHTML = cookingOrders.map((o) => this.renderOrderCard(o)).join('');
     }
 
-    // お渡し可能リスト描画
-    if (readyOrders.length === 0) {
-      readyList.innerHTML = `
-        <div style="text-align: center; color: var(--text-muted); margin: auto; padding: 2rem;">
-          <span style="font-size: 2rem;">☕</span>
-          <p>お渡し待ちの注文はありません</p>
-        </div>
-      `;
-    } else {
-      readyList.innerHTML = readyOrders.map((o) => this.renderOrderCard(o, 'ready')).join('');
-    }
-
-    // アクションボタンのイベントリスナー設定
+    // 「調理完了・お渡しへ送る」ボタンのイベント設定
     this.container.querySelectorAll('.btn-to-ready').forEach((btn) => {
       btn.addEventListener('click', () => {
         const orderId = btn.dataset.id;
@@ -143,58 +112,50 @@ export class KitchenComponent {
         firebaseManager.updateOrderStatus(orderId, 'ready');
       });
     });
-
-    this.container.querySelectorAll('.btn-to-delivered').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const orderId = btn.dataset.id;
-        playPop();
-        store.updateOrderStatus(orderId, 'delivered');
-        firebaseManager.updateOrderStatus(orderId, 'delivered');
-      });
-    });
   }
 
-  renderOrderCard(order, type) {
+  renderOrderCard(order) {
     const timeStr = new Date(order.timestamp).toLocaleTimeString('ja-JP', {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit'
     });
 
-    const isCooking = type === 'cooking';
+    // 注文からの経過分数を計算
+    const elapsedMinutes = Math.floor((Date.now() - order.timestamp) / 60000);
+    const elapsedBadge = elapsedMinutes > 5 
+      ? `<span class="elapsed-warning">⏱️ ${elapsedMinutes}分経過</span>` 
+      : `<span class="elapsed-normal">⏱️ ${elapsedMinutes}分前</span>`;
 
     return `
-      <div class="kitchen-order-card ${isCooking ? 'cooking-card' : 'ready-card'}" data-id="${order.id}">
+      <div class="kitchen-order-card cooking-card prominent-card" data-id="${order.id}">
         <div class="k-card-header">
-          <span class="k-order-num">${order.orderNumber}</span>
+          <div style="display: flex; align-items: baseline; gap: 0.6rem;">
+            <span class="k-order-num">${order.orderNumber}</span>
+            ${elapsedBadge}
+          </div>
           <span class="k-order-time">${timeStr} (${order.terminal || 'レジ'})</span>
         </div>
 
         <div class="k-card-items-list">
           ${order.items.map((it) => `
             <div class="k-card-item-row">
-              <span>${it.emoji} ${it.name}</span>
+              <span class="item-name">${it.emoji} ${it.name}</span>
               <span class="k-card-item-qty">×${it.quantity}</span>
             </div>
           `).join('')}
         </div>
 
-        ${isCooking ? `
-          <button class="btn-kitchen-action btn-to-ready" data-id="${order.id}">
-            <span>🔔 調理完了・呼出する</span>
-          </button>
-        ` : `
-          <button class="btn-kitchen-action btn-to-delivered" data-id="${order.id}">
-            <span>✅ お渡し完了</span>
-          </button>
-        `}
+        <button class="btn-kitchen-action btn-to-ready" data-id="${order.id}">
+          <span>🔔 調理完了（お渡しへ送る）</span>
+        </button>
       </div>
     `;
   }
 
   setupEventListeners() {
-    this.container.querySelector('#btnGoToCallDisplay')?.addEventListener('click', () => {
-      document.getElementById('tabCall')?.click();
+    this.container.querySelector('#btnGoToDeliveryTab')?.addEventListener('click', () => {
+      document.getElementById('tabDelivery')?.click();
     });
   }
 }
