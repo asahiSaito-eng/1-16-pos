@@ -5,18 +5,29 @@ import { playDingDong, playPop } from './sound.js';
 
 const FIREBASE_CONFIG_STORAGE_KEY = 'bunkasai_pos_firebase_config_v1';
 
+// あらかじめ設定しておくFirebase設定（ここに書き込んでおけば画面での入力不要で全自動接続）
+export const BUILTIN_FIREBASE_CONFIG = {
+  projectId: "1-16schoolfestival",
+  authDomain: "1-16schoolfestival.firebaseapp.com",
+  databaseURL: "https://1-16schoolfestival-default-rtdb.asia-southeast1.firebasedatabase.app",
+  storageBucket: "1-16schoolfestival.appspot.com",
+  apiKey: "", // Webアプリ登録後に発行されるAPIキー
+  appId: "",  // Webアプリ登録後に発行されるApp ID
+  messagingSenderId: ""
+};
+
 class FirebaseManager {
   constructor() {
     this.app = null;
     this.db = null;
     this.statusListeners = new Set();
-    this.status = 'unconfigured'; // 'unconfigured' | 'connecting' | 'connected' | 'disconnected' | 'error'
+    this.status = 'unconfigured';
     this.initialized = false;
     this.listeners = [];
     this.isLocalUpdate = false;
   }
 
-  // 設定の取得（localStorage優先、無ければ環境変数）
+  // 設定の取得（localStorage優先、無ければ環境変数、無ければ組み込み初期設定）
   getConfig() {
     try {
       const saved = localStorage.getItem(FIREBASE_CONFIG_STORAGE_KEY);
@@ -29,16 +40,16 @@ class FirebaseManager {
 
     // 環境変数からのフォールバック
     const envConfig = {
-      apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
-      authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
-      databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || '',
-      projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || '',
-      storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '',
-      messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-      appId: import.meta.env.VITE_FIREBASE_APP_ID || ''
+      apiKey: import.meta.env.VITE_FIREBASE_API_KEY || BUILTIN_FIREBASE_CONFIG.apiKey,
+      authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || BUILTIN_FIREBASE_CONFIG.authDomain,
+      databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || BUILTIN_FIREBASE_CONFIG.databaseURL,
+      projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || BUILTIN_FIREBASE_CONFIG.projectId,
+      storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || BUILTIN_FIREBASE_CONFIG.storageBucket,
+      messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || BUILTIN_FIREBASE_CONFIG.messagingSenderId,
+      appId: import.meta.env.VITE_FIREBASE_APP_ID || BUILTIN_FIREBASE_CONFIG.appId
     };
 
-    if (envConfig.databaseURL || envConfig.projectId) {
+    if (envConfig.apiKey || envConfig.databaseURL) {
       return envConfig;
     }
 
