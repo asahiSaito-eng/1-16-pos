@@ -7,13 +7,14 @@ const FIREBASE_CONFIG_STORAGE_KEY = 'bunkasai_pos_firebase_config_v1';
 
 // あらかじめ設定しておくFirebase設定（ここに書き込んでおけば画面での入力不要で全自動接続）
 export const BUILTIN_FIREBASE_CONFIG = {
-  projectId: "1-16schoolfestival",
-  authDomain: "1-16schoolfestival.firebaseapp.com",
-  databaseURL: "https://1-16schoolfestival-default-rtdb.asia-southeast1.firebasedatabase.app",
-  storageBucket: "1-16schoolfestival.appspot.com",
-  apiKey: "", // Webアプリ登録後に発行されるAPIキー
-  appId: "",  // Webアプリ登録後に発行されるApp ID
-  messagingSenderId: ""
+  apiKey: "AIzaSyCNGOb_IPQZX_endgeKmJdfRAVdImOVTac",
+  authDomain: "schoolfestival-4128d.firebaseapp.com",
+  databaseURL: "https://schoolfestival-4128d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "schoolfestival-4128d",
+  storageBucket: "schoolfestival-4128d.firebasestorage.app",
+  messagingSenderId: "1050384111321",
+  appId: "1:1050384111321:web:aeb5ff683b4878535dd0c8",
+  measurementId: "G-Y4B4QKBCR2"
 };
 
 class FirebaseManager {
