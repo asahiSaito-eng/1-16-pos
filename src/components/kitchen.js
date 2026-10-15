@@ -1,7 +1,6 @@
 import { store } from '../state.js';
 import { playPop } from '../sound.js';
 import { firebaseManager } from '../firebase.js';
-import { p2p } from '../p2p.js';
 
 export class KitchenComponent {
   constructor(container) {
@@ -146,7 +145,6 @@ export class KitchenComponent {
         playPop();
         store.updateOrderStatus(orderId, 'ready');
         firebaseManager.updateOrderStatus(orderId, 'ready');
-        p2p.broadcastStatus(orderId, 'ready');
       });
     });
 
@@ -156,7 +154,6 @@ export class KitchenComponent {
         playPop();
         store.updateOrderStatus(orderId, 'delivered');
         firebaseManager.updateOrderStatus(orderId, 'delivered');
-        p2p.broadcastStatus(orderId, 'delivered');
       });
     });
 

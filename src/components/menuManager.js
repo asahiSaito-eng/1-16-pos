@@ -1,5 +1,4 @@
 import { store } from '../state.js';
-import { p2p } from '../p2p.js';
 import { firebaseManager } from '../firebase.js';
 import { playBeep } from '../sound.js';
 
@@ -16,6 +15,10 @@ export class MenuManagerComponent {
 
     store.subscribe('products:updated', () => this.renderProductsTable());
     store.subscribe('stock:updated', () => this.renderProductsTable());
+    store.subscribe('categories:updated', () => {
+      this.renderProductsTable();
+      this.renderCategoryChipsPreview();
+    });
   }
 
   render() {
@@ -24,15 +27,21 @@ export class MenuManagerComponent {
         <!-- ツールバー -->
         <div class="menu-mgmt-toolbar">
           <div>
-            <h2 style="font-size: 1.25rem; font-weight: 800;">🍰 商品・メニュー管理</h2>
-            <p style="font-size: 0.85rem; color: var(--text-muted);">商品の追加・価格変更・在庫の補充ができます</p>
+            <h2 style="font-size: 1.25rem; font-weight: 800;">🍰 商品・カテゴリー管理</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">商品の追加・価格変更・カテゴリーのカスタマイズができます</p>
           </div>
-          <div>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn-secondary" id="btnOpenCategoryManager" style="font-weight: 800;">
+              <span>🏷️ カテゴリー設定</span>
+            </button>
             <button class="btn-primary" id="btnAddNewProduct">
               <span>＋ 新しい商品を追加</span>
             </button>
           </div>
         </div>
+
+        <!-- 現在のカテゴリープレビュー -->
+        <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.5rem; overflow-x: auto;" id="categoryChipsPreviewContainer"></div>
 
         <!-- テーブルカード -->
         <div class="products-mgmt-table-card">
@@ -104,9 +113,52 @@ export class MenuManagerComponent {
           </form>
         </div>
       </div>
+
+      <!-- カテゴリー管理モーダル -->
+      <div class="modal-overlay" id="categoryManagerModal">
+        <div class="checkout-modal-card" style="max-width: 520px;">
+          <div class="modal-header">
+            <h3>🏷️ カテゴリーの編集・設定</h3>
+            <button class="modal-close-btn" id="btnCloseCategoryModal">&times;</button>
+          </div>
+          <div class="checkout-modal-body">
+            <!-- 新規カテゴリー追加フォーム -->
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md); padding: 0.85rem; display: flex; flex-direction: column; gap: 0.5rem;">
+              <strong style="font-size: 0.88rem;">＋ 新しいカテゴリーを追加</strong>
+              <div style="display: flex; gap: 0.5rem;">
+                <input type="text" id="newCategoryName" class="form-input" placeholder="カテゴリ名 (例: 軽食, 限定品)" style="flex: 2;" />
+                <button class="btn-primary" id="btnSubmitAddCategory" style="white-space: nowrap;">追加</button>
+              </div>
+            </div>
+
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-top: 0.5rem;">現在のカテゴリー一覧</div>
+            <div id="categoryManagerList" style="display: flex; flex-direction: column; gap: 0.45rem; max-height: 280px; overflow-y: auto;"></div>
+
+            <div style="margin-top: 0.5rem; text-align: right;">
+              <button class="btn-secondary" id="btnDoneCategoryModal">完了</button>
+            </div>
+          </div>
+        </div>
+      </div>
     `;
 
     this.renderProductsTable();
+    this.renderCategoryChipsPreview();
+  }
+
+  renderCategoryChipsPreview() {
+    const container = this.container.querySelector('#categoryChipsPreviewContainer');
+    if (!container) return;
+    const categories = store.get().categories || [];
+
+    container.innerHTML = `
+      <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); white-space: nowrap;">登録カテゴリー:</span>
+      ${categories.map((c) => `
+        <span style="background: white; border: 1px solid var(--card-border); padding: 0.25rem 0.65rem; border-radius: var(--radius-full); font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem; white-space: nowrap;">
+          <span>${c.name}</span>
+        </span>
+      `).join('')}
+    `;
   }
 
   renderProductsTable() {
@@ -128,7 +180,7 @@ export class MenuManagerComponent {
             ${isSoldOut ? '<span class="sold-out-badge" style="position: static; margin-left: 0.5rem; display: inline-block;">売切</span>' : ''}
             <div style="font-size: 0.75rem; color: var(--text-muted);">${prod.description || ''}</div>
           </td>
-          <td>${cat ? cat.name : prod.category}</td>
+          <td>${cat ? cat.name : (prod.category || '未分類')}</td>
           <td><strong style="color: var(--color-primary);">¥${prod.price.toLocaleString()}</strong></td>
           <td>
             <span style="font-weight: 700; ${isSoldOut ? 'color: var(--color-accent-red);' : ''}">
@@ -164,7 +216,6 @@ export class MenuManagerComponent {
           store.updateStock(id, newStock);
           const updatedProds = store.get().products;
           firebaseManager.syncProducts(updatedProds);
-          p2p.broadcastStock(updatedProds);
           playBeep();
         }
       });
@@ -186,7 +237,6 @@ export class MenuManagerComponent {
           store.deleteProduct(id);
           const updatedProds = store.get().products;
           firebaseManager.syncProducts(updatedProds);
-          p2p.broadcastStock(updatedProds);
         }
       });
     });
@@ -209,6 +259,75 @@ export class MenuManagerComponent {
       e.preventDefault();
       this.saveProductForm();
     });
+
+    // カテゴリー管理モーダル
+    this.container.querySelector('#btnOpenCategoryManager')?.addEventListener('click', () => {
+      this.openCategoryModal();
+    });
+    this.container.querySelector('#btnCloseCategoryModal')?.addEventListener('click', () => {
+      this.closeCategoryModal();
+    });
+    this.container.querySelector('#btnDoneCategoryModal')?.addEventListener('click', () => {
+      this.closeCategoryModal();
+    });
+
+    // カテゴリー新規追加ボタン
+    this.container.querySelector('#btnSubmitAddCategory')?.addEventListener('click', () => {
+      const input = this.container.querySelector('#newCategoryName');
+      const name = input.value.trim();
+      if (!name) return;
+
+      const catId = 'cat_' + Date.now();
+      store.addCategory({
+        id: catId,
+        name: name
+      });
+      firebaseManager.syncCategories(store.get().categories);
+      input.value = '';
+      this.renderCategoryManagerList();
+      playBeep();
+    });
+  }
+
+  openCategoryModal() {
+    this.renderCategoryManagerList();
+    this.container.querySelector('#categoryManagerModal').classList.add('active');
+  }
+
+  closeCategoryModal() {
+    this.container.querySelector('#categoryManagerModal').classList.remove('active');
+  }
+
+  renderCategoryManagerList() {
+    const list = this.container.querySelector('#categoryManagerList');
+    if (!list) return;
+    const categories = store.get().categories || [];
+
+    list.innerHTML = categories.map((c) => {
+      const isAll = c.id === 'all';
+      return `
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.75rem; background: white; border: 1px solid var(--card-border); border-radius: var(--radius-sm);">
+          <span style="font-weight: 700; font-size: 0.9rem;">${c.name}</span>
+          <div>
+            ${isAll ? '<span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">(固定)</span>' : `
+              <button class="btn-clear-cart btn-delete-cat" data-id="${c.id}" style="color: var(--color-accent-red); font-size: 0.78rem;">削除</button>
+            `}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    list.querySelectorAll('.btn-delete-cat').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const catId = btn.dataset.id;
+        const cat = categories.find((c) => c.id === catId);
+        if (confirm(`カテゴリー「${cat?.name}」を削除しますか？`)) {
+          store.deleteCategory(catId);
+          firebaseManager.syncCategories(store.get().categories);
+          this.renderCategoryManagerList();
+        }
+      });
+    });
   }
 
   populateCategorySelect(selectedCatId) {
@@ -229,7 +348,8 @@ export class MenuManagerComponent {
     this.container.querySelector('#formProductEmoji').value = '🍰';
     this.container.querySelector('#formProductDesc').value = '';
 
-    this.populateCategorySelect('crepe');
+    const firstCat = store.get().categories.find((c) => c.id !== 'all')?.id || 'crepe';
+    this.populateCategorySelect(firstCat);
     this.container.querySelector('#productFormModal').classList.add('active');
   }
 
@@ -277,7 +397,6 @@ export class MenuManagerComponent {
     store.updateProduct(productData);
     const updatedProds = store.get().products;
     firebaseManager.syncProducts(updatedProds);
-    p2p.broadcastStock(updatedProds);
     this.closeModal();
   }
 }

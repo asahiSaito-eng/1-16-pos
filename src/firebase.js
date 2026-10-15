@@ -182,6 +182,15 @@ class FirebaseManager {
         store.setProducts(productsData);
       }
     });
+
+    // 3. カテゴリー同期の監視
+    const categoriesRef = ref(this.db, `${basePath}/categories`);
+    onValue(categoriesRef, (snapshot) => {
+      const catsData = snapshot.val();
+      if (catsData && Array.isArray(catsData)) {
+        store.setCategories(catsData);
+      }
+    });
   }
 
   // 注文をFirebaseに送信
@@ -238,6 +247,22 @@ class FirebaseManager {
       return true;
     } catch (err) {
       console.warn('[Firebase] 在庫同期失敗:', err);
+      return false;
+    }
+  }
+
+  // カテゴリーマスターをFirebaseに一括保存
+  async syncCategories(categories) {
+    if (!this.db) return false;
+
+    const roomId = store.get().roomId || '1-16-pos';
+    const categoriesRef = ref(this.db, `rooms/${roomId}/categories`);
+
+    try {
+      await set(categoriesRef, categories);
+      return true;
+    } catch (err) {
+      console.warn('[Firebase] カテゴリ同期失敗:', err);
       return false;
     }
   }

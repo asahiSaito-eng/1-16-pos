@@ -268,6 +268,38 @@ class StateStore {
     }
   }
 
+  // --- カテゴリー管理 ---
+  addCategory(category) {
+    const exists = this.state.categories.some((c) => c.id === category.id);
+    if (!exists) {
+      this.state.categories.push(category);
+      this.saveState();
+      this.emit('categories:updated', this.state.categories);
+    }
+  }
+
+  updateCategory(updatedCategory) {
+    const idx = this.state.categories.findIndex((c) => c.id === updatedCategory.id);
+    if (idx !== -1) {
+      this.state.categories[idx] = { ...this.state.categories[idx], ...updatedCategory };
+      this.saveState();
+      this.emit('categories:updated', this.state.categories);
+    }
+  }
+
+  deleteCategory(categoryId) {
+    if (categoryId === 'all') return; // 「すべて」は削除不可
+    this.state.categories = this.state.categories.filter((c) => c.id !== categoryId);
+    this.saveState();
+    this.emit('categories:updated', this.state.categories);
+  }
+
+  setCategories(newCategories) {
+    this.state.categories = newCategories;
+    this.saveState();
+    this.emit('categories:updated', this.state.categories);
+  }
+
   // --- 設定更新 ---
   updateSettings(newSettings) {
     this.state = {

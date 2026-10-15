@@ -2,12 +2,12 @@ import confetti from 'canvas-confetti';
 import { store } from '../state.js';
 import { playBeep, playCashRegister, playCancel } from '../sound.js';
 import { firebaseManager } from '../firebase.js';
-import { p2p } from '../p2p.js';
 
 export class RegisterComponent {
   constructor(container) {
     this.container = container;
     this.selectedCategory = 'all';
+    this.selectedPaymentMethod = 'cash'; // 'cash' | 'dpay'
     this.tenderedAmount = ''; // 入力中の預かり金額文字列
     this.currentCompletedOrder = null;
 
@@ -22,6 +22,10 @@ export class RegisterComponent {
     store.subscribe('cart:updated', () => this.updateCartView());
     store.subscribe('stock:updated', () => this.renderProductsGrid());
     store.subscribe('products:updated', () => {
+      this.renderCategoryChips();
+      this.renderProductsGrid();
+    });
+    store.subscribe('categories:updated', () => {
       this.renderCategoryChips();
       this.renderProductsGrid();
     });
@@ -65,57 +69,90 @@ export class RegisterComponent {
         </div>
       </div>
 
-      <!-- 会計（テンキー・お釣り）モーダル -->
+      <!-- 会計モーダル（現金 / d払い両対応） -->
       <div class="modal-overlay" id="checkoutModal">
         <div class="checkout-modal-card">
           <div class="modal-header">
-            <h3>現金お会計</h3>
+            <h3>お会計</h3>
             <button class="modal-close-btn" id="btnCloseCheckoutModal">&times;</button>
           </div>
           <div class="checkout-modal-body">
-            <div class="payment-display-grid">
-              <div class="pay-stat-box">
-                <span class="pay-stat-label">お会計合計</span>
-                <span class="pay-stat-value total-highlight" id="modalBillTotal">¥0</span>
+            <!-- 支払い方法タブ -->
+            <div style="display: flex; gap: 0.5rem; background: #f1f5f9; padding: 4px; border-radius: var(--radius-md); margin-bottom: 0.5rem;">
+              <button class="btn-secondary" id="btnSelectCash" style="flex: 1; justify-content: center; font-weight: 800; border-radius: var(--radius-sm); border: none; padding: 0.6rem; background: white; color: var(--color-primary); box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+                <span>💵 現金</span>
+              </button>
+              <button class="btn-secondary" id="btnSelectDpay" style="flex: 1; justify-content: center; font-weight: 800; border-radius: var(--radius-sm); border: none; padding: 0.6rem; background: transparent; color: var(--text-muted);">
+                <span>📱 d払い</span>
+              </button>
+            </div>
+
+            <!-- 現金決済セクション -->
+            <div id="cashPaymentSection">
+              <div class="payment-display-grid">
+                <div class="pay-stat-box">
+                  <span class="pay-stat-label">お会計合計</span>
+                  <span class="pay-stat-value total-highlight" id="modalBillTotal">¥0</span>
+                </div>
+                <div class="pay-stat-box">
+                  <span class="pay-stat-label">預かり金額</span>
+                  <span class="pay-stat-value" id="modalReceivedDisplay">¥0</span>
+                </div>
               </div>
-              <div class="pay-stat-box">
-                <span class="pay-stat-label">預かり金額</span>
-                <span class="pay-stat-value" id="modalReceivedDisplay">¥0</span>
+
+              <div class="pay-stat-box" style="background: #f8fafc; padding: 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--card-border); margin: 0.6rem 0;">
+                <span class="pay-stat-label">お釣り</span>
+                <span class="pay-stat-value change-highlight" id="modalChangeDisplay">¥0</span>
               </div>
+
+              <!-- クイック金額ボタン -->
+              <div class="quick-cash-row" style="margin-bottom: 0.6rem;">
+                <button class="btn-quick-cash btn-quick-exact" id="btnQuickExact">ちょうど</button>
+                <button class="btn-quick-cash" data-add="1000">+1,000円</button>
+                <button class="btn-quick-cash" data-add="5000">+5,000円</button>
+                <button class="btn-quick-cash" data-add="10000">+10,000円</button>
+              </div>
+
+              <!-- テンキー -->
+              <div class="numpad-grid" style="margin-bottom: 0.75rem;">
+                <button class="numpad-btn" data-key="7">7</button>
+                <button class="numpad-btn" data-key="8">8</button>
+                <button class="numpad-btn" data-key="9">9</button>
+                <button class="numpad-btn" data-key="4">4</button>
+                <button class="numpad-btn" data-key="5">5</button>
+                <button class="numpad-btn" data-key="6">6</button>
+                <button class="numpad-btn" data-key="1">1</button>
+                <button class="numpad-btn" data-key="2">2</button>
+                <button class="numpad-btn" data-key="3">3</button>
+                <button class="numpad-btn" data-key="00">00</button>
+                <button class="numpad-btn" data-key="0">0</button>
+                <button class="numpad-btn action-clear" id="btnNumpadClear">クリア</button>
+              </div>
+
+              <button class="btn-finalize-pay" id="btnFinalizePay" disabled>
+                <span>現金 会計完了・引換券発行</span>
+              </button>
             </div>
 
-            <div class="pay-stat-box" style="background: #f8fafc; padding: 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--card-border);">
-              <span class="pay-stat-label">お釣り</span>
-              <span class="pay-stat-value change-highlight" id="modalChangeDisplay">¥0</span>
-            </div>
+            <!-- d払い決済セクション -->
+            <div id="dpayPaymentSection" style="display: none; flex-direction: column; gap: 1rem;">
+              <div style="background: linear-gradient(135deg, #fff1f2, #ffe4e6); border: 2px solid #fda4af; border-radius: var(--radius-md); padding: 1.25rem; text-align: center;">
+                <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #e11d48; color: white; padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: 0.82rem; font-weight: 800; margin-bottom: 0.5rem;">
+                  <span>📱</span><span>d払い QRコード決済</span>
+                </div>
+                <div style="font-size: 0.85rem; color: #9f1239; font-weight: 700; margin-bottom: 0.25rem;">お客様に入力してもらう金額</div>
+                <div style="font-size: 2.8rem; font-weight: 800; color: #be123c; letter-spacing: -0.02em;" id="dpayBillTotal">¥0</div>
+                <p style="font-size: 0.82rem; color: #881337; margin-top: 0.5rem; line-height: 1.5;">
+                  ① レジ前の<strong>d払いQRコード</strong>をお客様に読み取ってもらいます<br/>
+                  ② 上記の金額（<strong id="dpayGuideAmount">¥0</strong>）を入力して支払ってもらいます<br/>
+                  ③ お客様のスマホ画面で<strong>「支払い完了」</strong>を確認してください
+                </p>
+              </div>
 
-            <!-- クイック金額ボタン -->
-            <div class="quick-cash-row">
-              <button class="btn-quick-cash btn-quick-exact" id="btnQuickExact">ちょうど</button>
-              <button class="btn-quick-cash" data-add="1000">+1,000円</button>
-              <button class="btn-quick-cash" data-add="5000">+5,000円</button>
-              <button class="btn-quick-cash" data-add="10000">+10,000円</button>
+              <button class="btn-finalize-pay" id="btnFinalizeDpay" style="background: linear-gradient(135deg, #e11d48, #be123c); box-shadow: 0 6px 16px rgba(225, 29, 72, 0.35);">
+                <span>✅ お客様の支払い確認完了（引換券発行）</span>
+              </button>
             </div>
-
-            <!-- テンキー -->
-            <div class="numpad-grid">
-              <button class="numpad-btn" data-key="7">7</button>
-              <button class="numpad-btn" data-key="8">8</button>
-              <button class="numpad-btn" data-key="9">9</button>
-              <button class="numpad-btn" data-key="4">4</button>
-              <button class="numpad-btn" data-key="5">5</button>
-              <button class="numpad-btn" data-key="6">6</button>
-              <button class="numpad-btn" data-key="1">1</button>
-              <button class="numpad-btn" data-key="2">2</button>
-              <button class="numpad-btn" data-key="3">3</button>
-              <button class="numpad-btn" data-key="00">00</button>
-              <button class="numpad-btn" data-key="0">0</button>
-              <button class="numpad-btn action-clear" id="btnNumpadClear">クリア</button>
-            </div>
-
-            <button class="btn-finalize-pay" id="btnFinalizePay" disabled>
-              <span>会計完了・引換券発行</span>
-            </button>
           </div>
         </div>
       </div>
@@ -144,10 +181,14 @@ export class RegisterComponent {
                 <span id="ticketTotalAmount">¥0</span>
               </div>
               <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+                <span>お支払い方法</span>
+                <span id="ticketPaymentMethodDisplay" style="font-weight: 700;">💵 現金</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;" id="ticketReceivedRow">
                 <span>お預かり</span>
                 <span id="ticketReceivedAmount">¥0</span>
               </div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.95rem; font-weight: 700; color: var(--color-accent-green); margin-top: 0.25rem;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.95rem; font-weight: 700; color: var(--color-accent-green); margin-top: 0.25rem;" id="ticketChangeRow">
                 <span>お釣り</span>
                 <span id="ticketChangeAmount">¥0</span>
               </div>
@@ -320,13 +361,23 @@ export class RegisterComponent {
       this.closeCheckoutModal();
     });
 
+    // 支払い方法切り替えボタン
+    this.container.querySelector('#btnSelectCash')?.addEventListener('click', () => {
+      playBeep();
+      this.switchPaymentMethod('cash');
+    });
+
+    this.container.querySelector('#btnSelectDpay')?.addEventListener('click', () => {
+      playBeep();
+      this.switchPaymentMethod('dpay');
+    });
+
     // テンキーボタン
     this.container.querySelectorAll('.numpad-btn[data-key]').forEach((btn) => {
       btn.addEventListener('click', () => {
         playBeep();
         const key = btn.dataset.key;
         this.tenderedAmount += key;
-        // 先頭の余分な0をカット
         this.tenderedAmount = String(parseInt(this.tenderedAmount || '0', 10));
         this.updatePaymentCalculations();
       });
@@ -357,30 +408,42 @@ export class RegisterComponent {
       });
     });
 
-    // 会計確定ボタン
+    // 現金 会計確定ボタン
     this.container.querySelector('#btnFinalizePay')?.addEventListener('click', () => {
-      this.finalizePayment();
+      this.finalizePayment('cash');
+    });
+
+    // d払い 会計確定ボタン
+    this.container.querySelector('#btnFinalizeDpay')?.addEventListener('click', () => {
+      this.finalizePayment('dpay');
     });
 
     // キーボードショートカット（数字キー、Enterキー）
     window.addEventListener('keydown', (e) => {
       const checkoutModal = this.container.querySelector('#checkoutModal');
       if (checkoutModal && checkoutModal.classList.contains('active')) {
-        if (e.key >= '0' && e.key <= '9') {
-          playBeep();
-          this.tenderedAmount += e.key;
-          this.tenderedAmount = String(parseInt(this.tenderedAmount || '0', 10));
-          this.updatePaymentCalculations();
-        } else if (e.key === 'Backspace') {
-          playCancel();
-          this.tenderedAmount = this.tenderedAmount.slice(0, -1);
-          this.updatePaymentCalculations();
-        } else if (e.key === 'Enter') {
-          const finalizeBtn = this.container.querySelector('#btnFinalizePay');
-          if (finalizeBtn && !finalizeBtn.disabled) {
-            this.finalizePayment();
+        if (this.selectedPaymentMethod === 'cash') {
+          if (e.key >= '0' && e.key <= '9') {
+            playBeep();
+            this.tenderedAmount += e.key;
+            this.tenderedAmount = String(parseInt(this.tenderedAmount || '0', 10));
+            this.updatePaymentCalculations();
+          } else if (e.key === 'Backspace') {
+            playCancel();
+            this.tenderedAmount = this.tenderedAmount.slice(0, -1);
+            this.updatePaymentCalculations();
+          } else if (e.key === 'Enter') {
+            const finalizeBtn = this.container.querySelector('#btnFinalizePay');
+            if (finalizeBtn && !finalizeBtn.disabled) {
+              this.finalizePayment('cash');
+            }
           }
-        } else if (e.key === 'Escape') {
+        } else if (this.selectedPaymentMethod === 'dpay') {
+          if (e.key === 'Enter') {
+            this.finalizePayment('dpay');
+          }
+        }
+        if (e.key === 'Escape') {
           this.closeCheckoutModal();
         }
       }
@@ -398,11 +461,52 @@ export class RegisterComponent {
     });
   }
 
+  switchPaymentMethod(method) {
+    this.selectedPaymentMethod = method;
+    const btnCash = this.container.querySelector('#btnSelectCash');
+    const btnDpay = this.container.querySelector('#btnSelectDpay');
+    const cashSection = this.container.querySelector('#cashPaymentSection');
+    const dpaySection = this.container.querySelector('#dpayPaymentSection');
+
+    if (method === 'cash') {
+      btnCash.style.background = 'white';
+      btnCash.style.color = 'var(--color-primary)';
+      btnCash.style.boxShadow = '0 2px 6px rgba(0,0,0,0.06)';
+
+      btnDpay.style.background = 'transparent';
+      btnDpay.style.color = 'var(--text-muted)';
+      btnDpay.style.boxShadow = 'none';
+
+      cashSection.style.display = 'block';
+      dpaySection.style.display = 'none';
+      this.updatePaymentCalculations();
+    } else {
+      btnDpay.style.background = '#e11d48';
+      btnDpay.style.color = 'white';
+      btnDpay.style.boxShadow = '0 2px 6px rgba(225,29,72,0.25)';
+
+      btnCash.style.background = 'transparent';
+      btnCash.style.color = 'var(--text-muted)';
+      btnCash.style.boxShadow = 'none';
+
+      cashSection.style.display = 'none';
+      dpaySection.style.display = 'flex';
+
+      const total = store.getCartTotal();
+      this.container.querySelector('#dpayBillTotal').textContent = `¥${total.toLocaleString()}`;
+      this.container.querySelector('#dpayGuideAmount').textContent = `¥${total.toLocaleString()}`;
+    }
+  }
+
   openCheckoutModal() {
     this.tenderedAmount = '';
     const total = store.getCartTotal();
     this.container.querySelector('#modalBillTotal').textContent = `¥${total.toLocaleString()}`;
-    this.updatePaymentCalculations();
+    this.container.querySelector('#dpayBillTotal').textContent = `¥${total.toLocaleString()}`;
+    this.container.querySelector('#dpayGuideAmount').textContent = `¥${total.toLocaleString()}`;
+    
+    // デフォルトは現金モードで開く
+    this.switchPaymentMethod('cash');
     this.container.querySelector('#checkoutModal').classList.add('active');
   }
 
@@ -432,16 +536,22 @@ export class RegisterComponent {
     }
   }
 
-  finalizePayment() {
+  finalizePayment(method = 'cash') {
     const total = store.getCartTotal();
-    const received = parseInt(this.tenderedAmount || '0', 10);
-    const change = received - total;
+    let received = total;
+    let change = 0;
+
+    if (method === 'cash') {
+      received = parseInt(this.tenderedAmount || '0', 10);
+      change = received - total;
+      if (received < total) return;
+    }
 
     // 会計処理
     const newOrder = store.checkout({
       received: received,
       change: change,
-      method: 'cash'
+      method: method
     });
 
     if (!newOrder) return;
@@ -454,9 +564,8 @@ export class RegisterComponent {
       origin: { y: 0.6 }
     });
 
-    // Firebase & P2P リアルタイム同期
+    // Firebase リアルタイム同期
     firebaseManager.pushOrder(newOrder);
-    p2p.broadcastOrder(newOrder);
 
     this.closeCheckoutModal();
     this.showReceiptModal(newOrder);
@@ -470,8 +579,23 @@ export class RegisterComponent {
     this.container.querySelector('#ticketDateDisplay').textContent = new Date(order.timestamp).toLocaleString('ja-JP');
     this.container.querySelector('#ticketNumberDisplay').textContent = order.orderNumber;
     this.container.querySelector('#ticketTotalAmount').textContent = `¥${order.total.toLocaleString()}`;
-    this.container.querySelector('#ticketReceivedAmount').textContent = `¥${order.received.toLocaleString()}`;
-    this.container.querySelector('#ticketChangeAmount').textContent = `¥${order.change.toLocaleString()}`;
+
+    const isDpay = order.paymentMethod === 'dpay';
+    const payMethodDisplay = this.container.querySelector('#ticketPaymentMethodDisplay');
+    const receivedRow = this.container.querySelector('#ticketReceivedRow');
+    const changeRow = this.container.querySelector('#ticketChangeRow');
+
+    if (isDpay) {
+      payMethodDisplay.innerHTML = '<span style="color: #e11d48;">📱 d払い (決済確認済)</span>';
+      receivedRow.style.display = 'none';
+      changeRow.style.display = 'none';
+    } else {
+      payMethodDisplay.textContent = '💵 現金';
+      receivedRow.style.display = 'flex';
+      changeRow.style.display = 'flex';
+      this.container.querySelector('#ticketReceivedAmount').textContent = `¥${order.received.toLocaleString()}`;
+      this.container.querySelector('#ticketChangeAmount').textContent = `¥${order.change.toLocaleString()}`;
+    }
 
     const itemsList = this.container.querySelector('#ticketItemsList');
     itemsList.innerHTML = order.items.map((it) => `

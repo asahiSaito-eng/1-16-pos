@@ -28,6 +28,10 @@ export class AnalyticsComponent {
           <div class="stat-metric-card">
             <span class="metric-title">💰 総売上金額</span>
             <span class="metric-value" id="statTotalSales">¥0</span>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.35rem; font-size: 0.75rem; font-weight: 700;">
+              <span style="color: #64748b;">💵 現金: <span id="statCashSales">¥0</span></span>
+              <span style="color: #e11d48;">📱 d払い: <span id="statDpaySales">¥0</span></span>
+            </div>
           </div>
           <div class="stat-metric-card">
             <span class="metric-title">👥 総注文件数</span>
@@ -81,6 +85,7 @@ export class AnalyticsComponent {
                 <th>端末</th>
                 <th>商品内訳</th>
                 <th>合計金額</th>
+                <th>決済方法</th>
                 <th>お預かり</th>
                 <th>お釣り</th>
                 <th>状態</th>
@@ -163,11 +168,20 @@ export class AnalyticsComponent {
     const avgCheck = totalOrders > 0 ? Math.round(totalSales / totalOrders) : 0;
     
     let totalItemsCount = 0;
+    let cashSales = 0;
+    let dpaySales = 0;
     const productStats = {}; // prodId -> { name, emoji, count, amount }
     const categoryStats = {}; // catId -> amount
     const hourlySales = { 9: 0, 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0 };
 
     orders.forEach((order) => {
+      // 決済方法別売上
+      if (order.paymentMethod === 'dpay') {
+        dpaySales += order.total || 0;
+      } else {
+        cashSales += order.total || 0;
+      }
+
       // 時間帯集計
       const hour = new Date(order.timestamp).getHours();
       if (hourlySales[hour] !== undefined) {
@@ -198,6 +212,11 @@ export class AnalyticsComponent {
 
     // メトリクス表示更新
     this.container.querySelector('#statTotalSales').textContent = `¥${totalSales.toLocaleString()}`;
+    const cashEl = this.container.querySelector('#statCashSales');
+    const dpayEl = this.container.querySelector('#statDpaySales');
+    if (cashEl) cashEl.textContent = `¥${cashSales.toLocaleString()}`;
+    if (dpayEl) dpayEl.textContent = `¥${dpaySales.toLocaleString()}`;
+
     this.container.querySelector('#statTotalOrders').textContent = `${totalOrders.toLocaleString()} 件`;
     this.container.querySelector('#statAverageCheck').textContent = `¥${avgCheck.toLocaleString()}`;
     this.container.querySelector('#statTotalItemsSold').textContent = `${totalItemsCount.toLocaleString()} 個`;
@@ -259,7 +278,7 @@ export class AnalyticsComponent {
     // 履歴テーブル更新
     const tbody = this.container.querySelector('#ordersHistoryTableBody');
     if (orders.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">会計データがありません</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">会計データがありません</td></tr>';
     } else {
       tbody.innerHTML = orders.map((o) => {
         const itemsText = (o.items || []).map((it) => `${it.name}×${it.quantity}`).join(', ');
@@ -269,14 +288,18 @@ export class AnalyticsComponent {
           ready: '<span style="color: #059669; font-weight: 700;">🔔 呼出中</span>',
           delivered: '<span style="color: #64748b; font-weight: 600;">✅ 受渡済</span>'
         };
+        const payDisplay = o.paymentMethod === 'dpay'
+          ? '<span style="color: #e11d48; font-weight: 700;">📱 d払い</span>'
+          : '<span style="color: #475569; font-weight: 600;">💵 現金</span>';
 
         return `
           <tr>
             <td><strong>${o.orderNumber}</strong></td>
             <td style="font-size: 0.8rem; color: var(--text-muted);">${timeStr}</td>
             <td>${o.terminal || 'レジ'}</td>
-            <td style="max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${itemsText}</td>
+            <td style="max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${itemsText}</td>
             <td><strong>¥${(o.total || 0).toLocaleString()}</strong></td>
+            <td>${payDisplay}</td>
             <td>¥${(o.received || 0).toLocaleString()}</td>
             <td>¥${(o.change || 0).toLocaleString()}</td>
             <td>${statusMap[o.status] || o.status}</td>
@@ -299,7 +322,7 @@ export class AnalyticsComponent {
       return;
     }
 
-    const headers = ['注文番号', '日時', '端末', '合計金額', '預かり金額', 'お釣り', '商品内訳', 'ステータス'];
+    const headers = ['注文番号', '日時', '端末', '合計金額', '決済方法', '預かり金額', 'お釣り', '商品内訳', 'ステータス'];
     const rows = orders.map((o) => {
       const itemsStr = (o.items || []).map((it) => `${it.name}*${it.quantity}`).join(' | ');
       return [
@@ -307,6 +330,7 @@ export class AnalyticsComponent {
         `"${new Date(o.timestamp).toLocaleString('ja-JP')}"`,
         `"${o.terminal || ''}"`,
         o.total || 0,
+        `"${o.paymentMethod === 'dpay' ? 'd払い' : '現金'}"`,
         o.received || 0,
         o.change || 0,
         `"${itemsStr}"`,

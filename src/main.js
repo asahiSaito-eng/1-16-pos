@@ -1,6 +1,5 @@
 import './style.css';
 import { store } from './state.js';
-import { p2p } from './p2p.js';
 import { firebaseManager } from './firebase.js';
 import { RegisterComponent } from './components/register.js';
 import { KitchenComponent } from './components/kitchen.js';
@@ -19,7 +18,6 @@ class App {
     this.setupComponents();
     this.setupNavigation();
     this.initFirebase();
-    this.initP2P();
     this.setupKeyboardShortcuts();
   }
 
@@ -43,21 +41,20 @@ class App {
 
       if (firebaseManager.status === 'connected') {
         syncDot.className = 'status-dot connected';
-        syncText.textContent = '🔥 Firebase同期中';
+        syncText.textContent = '🔥 リアルタイム同期中';
       } else if (firebaseManager.status === 'connecting') {
         syncDot.className = 'status-dot connecting';
-        syncText.textContent = 'Firebase接続中...';
-      } else if (p2p.status === 'connected') {
-        syncDot.className = 'status-dot connected';
-        syncText.textContent = p2p.getPeerCount() > 0 ? `P2P同期 (${p2p.getPeerCount()}台)` : 'P2P待機中';
+        syncText.textContent = '同期接続中...';
+      } else if (firebaseManager.status === 'error') {
+        syncDot.className = 'status-dot';
+        syncText.textContent = '接続エラー';
       } else {
         syncDot.className = 'status-dot';
-        syncText.textContent = 'スタンドアロン';
+        syncText.textContent = '接続中...';
       }
     };
 
     firebaseManager.onStatusChange(updateSyncIndicator);
-    p2p.onStatusChange(updateSyncIndicator);
   }
 
   initFirebase() {
